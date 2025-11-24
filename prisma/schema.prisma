@@ -1,0 +1,174 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum Role {
+  user
+  admin
+}
+
+enum Label {
+  rumah
+  kantor
+  kos
+  sekolah
+  apartemen
+}
+
+enum Delivery {
+  delivery
+  pickup
+}
+
+enum Status {
+  pending
+  delivery
+  cancel
+  success
+}
+
+model users {
+  id       Int    @id @default(autoincrement())
+  role     Role   @default(user)
+  name     String
+  username String @unique
+  Phone    String
+  password String
+
+  address  address[]
+  cart     carts[]
+  checkout checkouts[]
+}
+
+model address {
+  id           Int     @id @default(autoincrement())
+  recipient    String
+  label        Label
+  city         String
+  subdistrict  String
+  zip_code     Int
+  address      String
+  main_address Boolean
+  user_id      Int
+
+  user     users        @relation(fields: [user_id], references: [id])
+  delivery deliveries[]
+}
+
+model products {
+  id            Int      @id @default(autoincrement())
+  name          String
+  description   String
+  sold          Int
+  categories_id Int
+  created_at    DateTime @default(now())
+
+  category         categories          @relation(fields: [categories_id], references: [id])
+  product_images   product_images[]
+  cart             carts[]
+  product_checkout product_checkouts[]
+}
+
+model product_images {
+  id         Int    @id @default(autoincrement())
+  image_path String
+  produt_id  Int
+
+  product products @relation(fields: [produt_id], references: [id])
+}
+
+model categories {
+  id       Int    @id @default(autoincrement())
+  category String
+
+  product products[]
+  variant variants[]
+}
+
+model variants {
+  id            Int    @id @default(autoincrement())
+  variant       String
+  price         Int
+  Stock         Int
+  categories_id Int
+
+  category         categories          @relation(fields: [categories_id], references: [id])
+  cart             carts[]
+  product_checkout product_checkouts[]
+}
+
+model carts {
+  id         Int @id @default(autoincrement())
+  quantity   Int
+  price      Int
+  product_id Int
+  variant_id Int
+  user_id    Int
+
+  product products @relation(fields: [product_id], references: [id])
+  variant variants @relation(fields: [variant_id], references: [id])
+  user    users    @relation(fields: [user_id], references: [id])
+}
+
+model product_checkouts {
+  id          Int @id @default(autoincrement())
+  quantity    Int
+  price       Int
+  product_id  Int
+  variant_id  Int
+  checkout_id Int
+
+  product products @relation(fields: [product_id], references: [id])
+  variant variants @relation(fields: [variant_id], references: [id])
+}
+
+model deliveries {
+  id             Int      @id @default(autoincrement())
+  delivery_type  Delivery
+  pickup_date    String?
+  pickup_hour    String?
+  delivery_price Int
+  address_id     Int
+
+  address  address    @relation(fields: [address_id], references: [id])
+  checkout checkouts?
+}
+
+model checkouts {
+  id               Int      @id @default(autoincrement())
+  order_id         Int      @unique
+  total_price      Int
+  estimation       String
+  description      String?
+  gift_card        Boolean
+  gift_description String?
+  snap_token       String?
+  user_id          Int
+  delevery_id      Int @unique
+  created_at       DateTime @default(now())
+
+  user     users      @relation(fields: [user_id], references: [id])
+  delivery deliveries @relation(fields: [delevery_id], references: [id])
+  status status[]
+}
+
+model status {
+  id Int @id @default(autoincrement())
+  status_type Status
+  description String?
+  checkout_id Int
+  created_at DateTime @default(now())
+
+  chcekout checkouts @relation(fields: [checkout_id], references: [id])
+}
