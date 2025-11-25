@@ -43,7 +43,7 @@ model users {
   role     Role   @default(user)
   name     String
   username String @unique
-  Phone    String
+  phone    String
   password String
 
   address  address[]
