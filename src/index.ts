@@ -5,6 +5,6 @@ import { userRoute } from './routes/user.route'
 const app = new Hono().basePath('/api')
 
 app.route('/auth', authRoute)
-app.route('/user', userRoute)
+app.route('/account/profile', userRoute)
 
 export default app
