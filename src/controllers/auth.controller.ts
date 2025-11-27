@@ -40,8 +40,8 @@ export const signup = async (c: Context) => {
     });
 
     const payload = {
+      role: user.role,
       sub: user.id,
-      username: user.username,
     };
     const secret = process.env.JWT_SECRET || "radiohead";
     const token = await sign(payload, secret);
@@ -58,7 +58,7 @@ export const signup = async (c: Context) => {
       {
         success: false,
         message: "Internal server error",
-        error: err instanceof Error ? err.message : String(err), 
+        error: err instanceof Error ? err.message : String(err),
       },
       500
     );
@@ -95,8 +95,8 @@ export const signin = async (c: Context) => {
     }
 
     const payload = {
+      role: user.role,
       sub: user.id,
-      username: user.username,
     };
     const secret = process.env.JWT_SECRET || "radiohead";
     const token = await sign(payload, secret);
