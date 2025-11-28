@@ -91,7 +91,7 @@ model product_images {
 
 model categories {
   id       Int    @id @default(autoincrement())
-  category String
+  category String @unique
 
   product products[]
   variant variants[]
