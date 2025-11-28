@@ -11,7 +11,7 @@ export const getAllAddress = async (c: Context) => {
       omit: { user_id: true },
     });
 
-    if (!address || (await address).length === 0) {
+    if (!address || address.length === 0) {
       return c.json(
         {
           success: false,
