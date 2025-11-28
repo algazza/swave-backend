@@ -28,10 +28,14 @@ export const verifyToken: MiddlewareHandler = async (c, next) => {
 };
 
 export const verifyAdmin: MiddlewareHandler = async (c, next) => {
-  const role = c.get("role");
+  try {
+    const role = c.get("role");
 
-  if (role !== "admin") {
-    return c.json({ message: "Forbidden: Admin access only" }, 403);
+    if (role !== "admin") {
+      return c.json({ message: "Forbidden: Admin access only" }, 403);
+    }
+    await next();
+  } catch {
+    return c.json({ message: "Invalid token" }, 401);
   }
-  await next();
 };
