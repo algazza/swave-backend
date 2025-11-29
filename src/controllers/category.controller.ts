@@ -147,11 +147,12 @@ export const deleteCategory = async (c: Context) => {
   try {
     const categoryParam = c.req.param("category");
 
-    const isCategory = await prisma.categories.findFirst({
+    const categoryId = await prisma.categories.findFirst({
       where: { category: categoryParam },
+      select: { id: true },
     });
 
-    if (!isCategory) {
+    if (!categoryId) {
       return c.json(
         {
           success: false,
@@ -160,6 +161,22 @@ export const deleteCategory = async (c: Context) => {
         401
       );
     }
+
+    const product = await prisma.products.findFirst({
+      where: { categories_id: categoryId.id },
+    });
+
+    if (product) {
+      return c.json({
+        success: false,
+        message:
+          "There are still products in this category, please move the product to another category first.",
+      });
+    }
+
+    await prisma.variants.deleteMany({
+      where: { categories_id: categoryId.id },
+    });
 
     await prisma.categories.delete({
       where: { category: categoryParam },
@@ -174,6 +191,7 @@ export const deleteCategory = async (c: Context) => {
       {
         success: false,
         message: "Internal server error",
+        error: err instanceof Error ? err.message : String(err),
       },
       500
     );
