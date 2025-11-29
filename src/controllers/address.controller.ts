@@ -1,6 +1,6 @@
 import { Context } from "hono";
 import prisma from "../../prisma/client";
-import { AddAddressRequest } from "../types/address";
+import { AddAddressRequest, UpdateAddressRequest } from "../types/address";
 
 export const getAllAddress = async (c: Context) => {
   try {
@@ -144,7 +144,7 @@ export const updateAddress = async (c: Context) => {
       zip_code,
       address,
       main_address,
-    } = c.get("validatedBody") as AddAddressRequest;
+    } = c.get("validatedBody") as UpdateAddressRequest;
 
     await prisma.address.update({
       where: { id: Number(addressId) },
