@@ -99,9 +99,9 @@ model categories {
 
 model variants {
   id            Int    @id @default(autoincrement())
-  variant       String
+  variant       String @unique
   price         Int
-  Stock         Int
+  stock         Int
   categories_id Int
 
   category         categories          @relation(fields: [categories_id], references: [id])
