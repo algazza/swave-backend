@@ -64,7 +64,6 @@ CREATE TABLE `variants` (
     `stock` INTEGER NOT NULL,
     `categories_id` INTEGER NOT NULL,
 
-    UNIQUE INDEX `variants_variant_key`(`variant`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 

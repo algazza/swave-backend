@@ -99,7 +99,7 @@ model categories {
 
 model variants {
   id            Int    @id @default(autoincrement())
-  variant       String @unique
+  variant       String 
   price         Int
   stock         Int
   categories_id Int
