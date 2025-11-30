@@ -1,16 +1,25 @@
-import { Hono } from 'hono'
-import { authRoute } from './routes/auth.route'
-import { userRoute } from './routes/user.route'
-import { AddressRoute } from './routes/address.route'
-import { categoryRoute } from './routes/category.route'
-import { variantRoute } from './routes/variant.route'
+import { Hono } from "hono";
+import { cors } from "hono/cors";
+import { serveStatic } from "hono/bun";
+import { authRoute } from "./routes/auth.route";
+import { userRoute } from "./routes/user.route";
+import { AddressRoute } from "./routes/address.route";
+import { categoryRoute } from "./routes/category.route";
+import { variantRoute } from "./routes/variant.route";
 
-const app = new Hono().basePath('/api')
+const port = process.env.PORT || 3000;
+const app = new Hono();
 
-app.route('/auth', authRoute)
-app.route('/account/profile', userRoute)
-app.route('/account/address', AddressRoute)
-app.route('/category', categoryRoute)
-app.route('/variant', variantRoute)
+app.use("*", cors());
+app.use("/images/*", serveStatic({ root: "./" }));
 
-export default app
+app.route("/api/auth", authRoute);
+app.route("/api/account/profile", userRoute);
+app.route("/api/account/address", AddressRoute);
+app.route("/api/category", categoryRoute);
+app.route("/api/variant", variantRoute);
+
+export default {
+  port,
+  fetch: app.fetch,
+};
