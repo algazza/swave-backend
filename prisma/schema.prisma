@@ -76,6 +76,7 @@ model products {
   created_at    DateTime @default(now())
 
   category         categories          @relation(fields: [categories_id], references: [id])
+  variant          variants[]
   product_images   product_images[]
   cart             carts[]
   product_checkout product_checkouts[]
@@ -94,7 +95,6 @@ model categories {
   category String @unique
 
   product products[]
-  variant variants[]
 }
 
 model variants {
@@ -102,9 +102,9 @@ model variants {
   variant       String 
   price         Int
   stock         Int
-  categories_id Int
+  product_id    Int
 
-  category         categories          @relation(fields: [categories_id], references: [id])
+  product          products           @relation(fields: [product_id], references: [id])
   cart             carts[]
   product_checkout product_checkouts[]
 }

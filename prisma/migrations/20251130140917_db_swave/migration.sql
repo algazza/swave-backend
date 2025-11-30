@@ -62,7 +62,7 @@ CREATE TABLE `variants` (
     `variant` VARCHAR(191) NOT NULL,
     `price` INTEGER NOT NULL,
     `stock` INTEGER NOT NULL,
-    `categories_id` INTEGER NOT NULL,
+    `product_id` INTEGER NOT NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -143,7 +143,7 @@ ALTER TABLE `products` ADD CONSTRAINT `products_categories_id_fkey` FOREIGN KEY 
 ALTER TABLE `product_images` ADD CONSTRAINT `product_images_produt_id_fkey` FOREIGN KEY (`produt_id`) REFERENCES `products`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `variants` ADD CONSTRAINT `variants_categories_id_fkey` FOREIGN KEY (`categories_id`) REFERENCES `categories`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `variants` ADD CONSTRAINT `variants_product_id_fkey` FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `carts` ADD CONSTRAINT `carts_product_id_fkey` FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
