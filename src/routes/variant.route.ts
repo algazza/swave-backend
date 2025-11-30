@@ -6,9 +6,9 @@ import { addVariantSchema, updateVariantSchema } from "../schemas/variant.schema
 
 const route = new Hono()
 
-route.get('/:category', verifyToken, verifyAdmin, getVariantByCategory)
-route.post('/:category', verifyToken, verifyAdmin, validateBody(addVariantSchema), createVariant)
-route.put('/:category/:variant', verifyToken, verifyAdmin, validateBody(updateVariantSchema), updateVariant)
-route.delete('/:category/:variant', verifyToken, verifyAdmin, deleteVaraint)
+route.get('/:productId', verifyToken, verifyAdmin, getVariantByCategory)
+route.post('/:productId', verifyToken, verifyAdmin, validateBody(addVariantSchema), createVariant)
+route.put('/:productId/:variant', verifyToken, verifyAdmin, validateBody(updateVariantSchema), updateVariant)
+route.delete('/:productId/:variant', verifyToken, verifyAdmin, deleteVaraint)
 
 export const variantRoute = route 

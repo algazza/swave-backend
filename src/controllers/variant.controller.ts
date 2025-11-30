@@ -4,18 +4,18 @@ import { AddVariantRequest, UpdateVariantRequest } from "../types/variant";
 
 export const getVariantByCategory = async (c: Context) => {
   try {
-    const categoryParam = c.req.param("category");
+    const productId = c.req.param("productId");
 
-    const varaintData = await prisma.categories.findUnique({
-      where: { category: categoryParam },
-      select: { category: true, variant: true },
+    const varaintData = await prisma.products.findUnique({
+      where: { id: Number(productId) },
+      select: { id: true, name: true, variant: true },
     });
 
     if (!varaintData) {
       return c.json(
         {
           success: false,
-          message: "Category not found",
+          message: "Variant not found",
         },
         401
       );
@@ -37,27 +37,28 @@ export const getVariantByCategory = async (c: Context) => {
 
 export const createVariant = async (c: Context) => {
   try {
-    const categoryParam = c.req.param("category");
+    const productId = c.req.param("productId");
 
-    const categoryId = await prisma.categories.findUnique({
-      where: { category: categoryParam },
-      select: { id: true },
+    const product = await prisma.products.findUnique({
+      where: { id: Number(productId) },
     });
 
-    if (!categoryId) {
+    if (!product) {
       return c.json(
         {
           success: false,
-          message: "Category not found",
+          message: "Product not found",
         },
         401
       );
     }
 
-    const { variant, price, stock } = c.get("validatedBody") as AddVariantRequest;
+    const { variant, price, stock } = c.get(
+      "validatedBody"
+    ) as AddVariantRequest;
 
     const existing = await prisma.variants.findFirst({
-      where: { variant, categories_id: categoryId.id },
+      where: { variant, product_id: Number(productId) },
     });
 
     if (existing) {
@@ -76,9 +77,9 @@ export const createVariant = async (c: Context) => {
         price,
         stock,
 
-        category: {
+        product: {
           connect: {
-            id: categoryId.id,
+            id: Number(productId),
           },
         },
       },
@@ -101,26 +102,25 @@ export const createVariant = async (c: Context) => {
 
 export const updateVariant = async (c: Context) => {
   try {
-    const categoryParam = c.req.param("category");
+    const productId = c.req.param("productId");
     const variantParam = c.req.param("variant");
 
-    const categoryId = await prisma.categories.findUnique({
-      where: { category: categoryParam },
-      select: { id: true },
+    const product = await prisma.products.findUnique({
+      where: { id: Number(productId) },
     });
 
-    if (!categoryId) {
+    if (!product) {
       return c.json(
         {
           success: false,
-          message: "Category not found",
+          message: "Product not found",
         },
         401
       );
     }
 
     const variantId = await prisma.variants.findFirst({
-      where: { variant: variantParam },
+      where: { variant: variantParam, product_id: Number(productId) },
       select: { id: true },
     });
 
@@ -134,10 +134,12 @@ export const updateVariant = async (c: Context) => {
       );
     }
 
-    const { variant, price, stock } = c.get("validatedBody") as UpdateVariantRequest;
+    const { variant, price, stock } = c.get(
+      "validatedBody"
+    ) as UpdateVariantRequest;
 
     const existing = await prisma.variants.findFirst({
-      where: { variant, categories_id: categoryId.id },
+      where: { variant, product_id: Number(productId) },
     });
 
     if (variant && existing) {
@@ -161,8 +163,8 @@ export const updateVariant = async (c: Context) => {
 
     return c.json({
       success: true,
-      message: 'Success update variant'
-    })
+      message: "Success update variant",
+    });
   } catch (err) {
     return c.json(
       {
@@ -176,19 +178,18 @@ export const updateVariant = async (c: Context) => {
 
 export const deleteVaraint = async (c: Context) => {
   try {
-    const categoryParam = c.req.param("category");
+    const productId = c.req.param("productId");
     const variantParam = c.req.param("variant");
 
-    const categoryId = await prisma.categories.findUnique({
-      where: { category: categoryParam },
-      select: { id: true },
+    const product = await prisma.products.findUnique({
+      where: { id: Number(productId) },
     });
 
-    if (!categoryId) {
+    if (!product) {
       return c.json(
         {
           success: false,
-          message: "Category not found",
+          message: "Product not found",
         },
         401
       );
@@ -210,13 +211,13 @@ export const deleteVaraint = async (c: Context) => {
     }
 
     await prisma.variants.delete({
-      where: { id: variantId.id, categories_id: categoryId.id },
+      where: { id: variantId.id, product_id: Number(productId) },
     });
 
     return c.json({
       success: true,
-      message: 'Success delete variant'
-    })
+      message: "Success delete variant",
+    });
   } catch (err) {
     return c.json(
       {
