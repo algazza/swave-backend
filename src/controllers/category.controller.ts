@@ -5,7 +5,7 @@ import { CategoryRequest } from "../types/category";
 export const getAllCategory = async (c: Context) => {
   try {
     const categoryData = await prisma.categories.findMany({
-      select: { category: true, product: true, variant: true },
+      select: { category: true, product: true, },
     });
 
     if (!categoryData || categoryData.length === 0) {
@@ -40,7 +40,7 @@ export const getOneCategory = async (c: Context) => {
 
     const categoryData = await prisma.categories.findUnique({
       where: { category: String(category) },
-      select: { category: true, product: true, variant: true },
+      select: { category: true, product: true, },
     });
 
     if (!categoryData) {
@@ -173,10 +173,6 @@ export const deleteCategory = async (c: Context) => {
           "There are still products in this category, please move the product to another category first.",
       });
     }
-
-    await prisma.variants.deleteMany({
-      where: { categories_id: categoryId.id },
-    });
 
     await prisma.categories.delete({
       where: { category: categoryParam },
