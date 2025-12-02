@@ -13,7 +13,7 @@ export const validateBody = <T extends z.ZodTypeAny>(
       if (ct.includes('application/json')) {
         raw = await c.req.json();
       } else if(ct.includes('multipart/form-data')){
-        const form = await c.req.parseBody()
+        const form = await c.req.parseBody({all: true})
         raw = {}
 
         for (const key in form) {
