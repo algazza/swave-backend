@@ -50,6 +50,8 @@ model users {
   address  address[]
   cart     carts[]
   checkout checkouts[]
+  review   reviews[]
+  insight_product insight_products[]
 }
 
 model address {
@@ -80,14 +82,16 @@ model products {
   product_images   product_images[]
   cart             carts[]
   product_checkout product_checkouts[]
+  review           reviews[]
+  insight_product  insight_products[]
 }
 
 model product_images {
   id         Int    @id @default(autoincrement())
   image_path String
-  produt_id  Int
+  product_id  Int
 
-  product products @relation(fields: [produt_id], references: [id])
+  product products @relation(fields: [product_id], references: [id])
 }
 
 model categories {
@@ -162,6 +166,7 @@ model checkouts {
   user     users      @relation(fields: [user_id], references: [id])
   delivery deliveries @relation(fields: [delevery_id], references: [id])
   status status[]
+  review reviews?
 }
 
 model status {
@@ -171,5 +176,36 @@ model status {
   checkout_id Int
   created_at DateTime @default(now())
 
-  chcekout checkouts @relation(fields: [checkout_id], references: [id])
+  checkout checkouts @relation(fields: [checkout_id], references: [id])
+}
+
+model reviews {
+  id Int @id @default(autoincrement())
+  star Int 
+  description String
+  product_id Int
+  user_id Int
+  checkout_id Int @unique
+  created_at DateTime @default(now())
+
+  product products @relation(fields: [product_id], references: [id])
+  user     users      @relation(fields: [user_id], references: [id])
+  checkout checkouts @relation(fields: [checkout_id], references: [id])
+}
+
+model insight_products {
+  id Int @id @default(autoincrement())
+  user_id Int
+  product_id Int
+
+  product  products   @relation(fields: [product_id], references: [id])
+  user     users      @relation(fields: [user_id], references: [id])
+}
+
+model contacts {
+  id Int @id @default(autoincrement())
+  name String
+  email String
+  topic String
+  description String
 }
