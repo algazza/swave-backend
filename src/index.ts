@@ -8,6 +8,7 @@ import { categoryRoute } from "./routes/category.route";
 import { variantRoute } from "./routes/variant.route";
 import { productRoute } from "./routes/product.route";
 import { contactRoute } from "./routes/contact.route";
+import { cartRoute } from "./routes/cart.route";
 
 const port = process.env.PORT || 3000;
 const app = new Hono();
@@ -21,6 +22,7 @@ app.route("/api/account/address", AddressRoute);
 app.route("/api/category", categoryRoute);
 app.route("/api/variant", variantRoute);
 app.route("/api/product", productRoute);
+app.route("/api/cart", cartRoute);
 app.route("/api/contact", contactRoute);
 
 export default {

@@ -15,7 +15,7 @@ export const getVariantByCategory = async (c: Context) => {
       return c.json(
         {
           success: false,
-          message: "Variant not found",
+          message: "Product not found",
         },
         401
       );
