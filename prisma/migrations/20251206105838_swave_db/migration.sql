@@ -195,6 +195,9 @@ ALTER TABLE `product_checkouts` ADD CONSTRAINT `product_checkouts_product_id_fke
 ALTER TABLE `product_checkouts` ADD CONSTRAINT `product_checkouts_variant_id_fkey` FOREIGN KEY (`variant_id`) REFERENCES `variants`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `product_checkouts` ADD CONSTRAINT `product_checkouts_checkout_id_fkey` FOREIGN KEY (`checkout_id`) REFERENCES `checkouts`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `deliveries` ADD CONSTRAINT `deliveries_address_id_fkey` FOREIGN KEY (`address_id`) REFERENCES `address`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey

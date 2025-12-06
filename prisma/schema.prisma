@@ -47,10 +47,10 @@ model users {
   phone    String
   password String
 
-  address  address[]
-  cart     carts[]
-  checkout checkouts[]
-  review   reviews[]
+  address         address[]
+  cart            carts[]
+  checkout        checkouts[]
+  review          reviews[]
   insight_product insight_products[]
 }
 
@@ -134,8 +134,9 @@ model product_checkouts {
   variant_id  Int
   checkout_id Int
 
-  product products @relation(fields: [product_id], references: [id])
-  variant variants @relation(fields: [variant_id], references: [id])
+  product  products  @relation(fields: [product_id], references: [id])
+  variant  variants  @relation(fields: [variant_id], references: [id])
+  checkout checkouts @relation(fields: [checkout_id], references: [id])
 }
 
 model deliveries {
@@ -160,13 +161,14 @@ model checkouts {
   gift_description String?
   snap_token       String?
   user_id          Int
-  delevery_id      Int @unique
+  delevery_id      Int      @unique
   created_at       DateTime @default(now())
 
-  user     users      @relation(fields: [user_id], references: [id])
-  delivery deliveries @relation(fields: [delevery_id], references: [id])
-  status status[]
-  review reviews?
+  user             users      @relation(fields: [user_id], references: [id])
+  delivery         deliveries @relation(fields: [delevery_id], references: [id])
+  status           status[]
+  product_checkout product_checkouts[]
+  review           reviews?
 }
 
 model status {
@@ -188,9 +190,9 @@ model reviews {
   checkout_id Int @unique
   created_at DateTime @default(now())
 
-  product products @relation(fields: [product_id], references: [id])
+  product  products   @relation(fields: [product_id], references: [id])
   user     users      @relation(fields: [user_id], references: [id])
-  checkout checkouts @relation(fields: [checkout_id], references: [id])
+  checkout checkouts  @relation(fields: [checkout_id], references: [id])
 }
 
 model insight_products {
