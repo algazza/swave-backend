@@ -166,6 +166,7 @@ export const getOneCheckoutUser = async (c: Context) => {
   }
 };
 
+// TODO: add midtrans
 export const createCheckout = async (c: Context) => {
   try {
     const userId = c.get("userId");
@@ -228,11 +229,16 @@ export const createCheckout = async (c: Context) => {
             quantity: p.quantity,
             user_id: userId,
           },
+          select: {id: true}
         });
 
         if (!cart) {
           throw new Error("Product not found in cart");
         }
+
+        await prisma.carts.delete({
+          where: {id: cart.id}
+        })
 
         await prisma.products.update({
           where: { id: p.product_id },
