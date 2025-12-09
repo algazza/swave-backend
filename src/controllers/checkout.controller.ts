@@ -166,7 +166,7 @@ export const getOneCheckoutUser = async (c: Context) => {
   }
 };
 
-// TODO: add midtrans
+// TODO: do checkout again and add midtrans
 export const createCheckout = async (c: Context) => {
   try {
     const userId = c.get("userId");
@@ -190,136 +190,129 @@ export const createCheckout = async (c: Context) => {
       });
     }
 
-    const variantItems = await Promise.all(
-      product_checkout.map(async (p) => {
-        const product = await prisma.products.findUnique({
-          where: { id: p.product_id },
-        });
-
-        if (!product) {
-          throw new Error("Product not found");
-        }
-
-        const variant = await prisma.variants.findUnique({
-          where: { id: p.variant_id },
-          select: {
-            id: true,
-            price: true,
-            stock: true,
-            product_id: true,
-          },
-        });
-
-        if (!variant) {
-          throw new Error("Variant not found");
-        }
-
-        if (variant.product_id !== p.product_id) {
-          throw new Error("Variant not belong to product");
-        }
-
-        if (variant.stock < p.quantity) {
-          throw new Error("Stock is overload");
-        }
-
-        const cart = await prisma.carts.findFirst({
-          where: {
-            product_id: p.product_id,
-            variant_id: p.variant_id,
-            quantity: p.quantity,
-            user_id: userId,
-          },
-          select: {id: true}
-        });
-
-        if (!cart) {
-          throw new Error("Product not found in cart");
-        }
-
-        await prisma.carts.delete({
-          where: {id: cart.id}
-        })
-
-        await prisma.products.update({
-          where: { id: p.product_id },
-          data: {
-            sold: {
-              increment: p.quantity,
+    await prisma.$transaction(async (tx) => {
+      const variantItems = await Promise.all(
+        product_checkout.map(async (p) => {
+          const variant = await tx.variants.findUnique({
+            where: { id: p.variant_id },
+            select: {
+              id: true,
+              price: true,
+              stock: true,
+              product_id: true,
             },
-            variant: {
-              update: {
-                where: { id: p.variant_id },
-                data: {
-                  stock: {
-                    decrement: p.quantity,
+          });
+
+          if (!variant) {
+            throw new Error("Variant not found");
+          }
+
+          if (variant.product_id !== p.product_id) {
+            throw new Error("Variant not belong to product");
+          }
+
+          if (variant.stock < p.quantity) {
+            throw new Error("Stock is overload");
+          }
+
+          const cart = await tx.carts.findFirst({
+            where: {
+              product_id: p.product_id,
+              variant_id: p.variant_id,
+              user_id: userId,
+            },
+            select: { id: true },
+          });
+
+          if (!cart) {
+            throw new Error("Product not found in cart");
+          }
+
+          await tx.carts.delete({
+            where: { id: cart.id },
+          });
+
+          await tx.products.update({
+            where: { id: p.product_id },
+            data: {
+              sold: {
+                increment: p.quantity,
+              },
+              variant: {
+                update: {
+                  where: { id: p.variant_id },
+                  data: {
+                    stock: {
+                      decrement: p.quantity,
+                    },
                   },
                 },
               },
             },
+          });
+
+          return {
+            ...p,
+            price: variant.price,
+            subtotal: variant.price * p.quantity,
+          };
+        })
+      );
+
+      const total_price = variantItems.reduce(
+        (acc, item) => acc + item.subtotal,
+        0
+      );
+
+      await tx.checkouts.create({
+        data: {
+          order_id: `ORD-${Date.now()}${Math.floor(Math.random() * 1000)}`,
+          description,
+          gift_card,
+          gift_description,
+          estimation: String(new Date(Date.now() + 3 * 86400000)),
+          total_price,
+          status: {
+            create: {
+              status_type: "pending",
+            },
           },
-        });
-
-        return {
-          ...p,
-          price: variant.price,
-          subtotal: variant.price * p.quantity,
-        };
-      })
-    );
-
-    const total_price = variantItems.reduce(
-      (acc, item) => acc + item.subtotal,
-      0
-    );
-
-    await prisma.checkouts.create({
-      data: {
-        description,
-        gift_card,
-        gift_description,
-        order_id: `${Date.now()}${Math.floor(Math.random() * 1000)}`,
-        estimation: String(new Date().setDate(new Date().getDate() + 3)),
-        total_price,
-        status: {
-          create: {
-            status_type: "pending",
-          },
-        },
-        delivery: {
-          create: {
-            delivery_type: delivery.delivery_type,
-            pickup_date: delivery.pickup_date,
-            pickup_hour: delivery.pickup_hour,
-            delivery_price: 0,
-            address: {
-              connect: {
-                id: delivery.address_id,
+          delivery: {
+            create: {
+              delivery_type: delivery.delivery_type,
+              pickup_date: delivery.pickup_date,
+              pickup_hour: delivery.pickup_hour,
+              delivery_price: 0,
+              address: {
+                connect: {
+                  id: delivery.address_id,
+                },
               },
             },
           },
-        },
-        user: {
-          connect: {
-            id: userId,
+          user: {
+            connect: {
+              id: userId,
+            },
+          },
+          product_checkout: {
+            create: variantItems.map((p) => ({
+              quantity: p.quantity,
+              price: p.price * p.quantity,
+              product: {
+                connect: {
+                  id: p.product_id,
+                },
+              },
+              variant: {
+                connect: {
+                  id: p.variant_id,
+                },
+              },
+            })),
           },
         },
-        product_checkout: {
-          create: variantItems.map((p) => ({
-            quantity: p.quantity,
-            price: p.price * p.quantity,
-            product: {
-              connect: {
-                id: p.product_id,
-              },
-            },
-            variant: {
-              connect: {
-                id: p.variant_id,
-              },
-            },
-          })),
-        },
-      },
+      });
     });
 
     return c.json({
@@ -392,8 +385,8 @@ export const createStatusCheckout = async (c: Context) => {
 
       return c.json({
         success: true,
-        message: 'Success add cancel status'
-      })
+        message: "Success add cancel status",
+      });
     }
 
     return c.json({
