@@ -106,7 +106,7 @@ CREATE TABLE `deliveries` (
 -- CreateTable
 CREATE TABLE `checkouts` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `order_id` INTEGER NOT NULL,
+    `order_id` VARCHAR(191) NOT NULL,
     `total_price` INTEGER NOT NULL,
     `estimation` VARCHAR(191) NOT NULL,
     `description` VARCHAR(191) NULL,
