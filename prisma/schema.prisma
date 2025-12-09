@@ -34,6 +34,7 @@ enum Delivery {
 
 enum Status {
   pending
+  packaged
   delivery
   cancel
   success
