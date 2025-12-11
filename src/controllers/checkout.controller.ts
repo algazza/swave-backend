@@ -1,7 +1,6 @@
 import { Context } from "hono";
 import prisma from "../../prisma/client";
 import { AddCheckoutRequest, UpdateStatusRequest } from "../types/checkout";
-import { id } from "zod/v4/locales";
 
 export const getAllCheckout = async (c: Context) => {
   try {
@@ -44,10 +43,16 @@ export const getAllCheckout = async (c: Context) => {
       data: checkoutJson,
     });
   } catch (err) {
-    return c.json({
-      success: false,
-      message: "Internal server error",
-    });
+    return c.json(
+      {
+        success: false,
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
+      },
+      500
+    );
   }
 };
 
@@ -78,10 +83,16 @@ export const getHistoryCheckout = async (c: Context) => {
       data: checkout,
     });
   } catch (err) {
-    return c.json({
-      success: false,
-      message: "Internal server error",
-    });
+    return c.json(
+      {
+        success: false,
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
+      },
+      500
+    );
   }
 };
 
@@ -119,10 +130,16 @@ export const getOneCheckoutAdmin = async (c: Context) => {
       data: checkout,
     });
   } catch (err) {
-    return c.json({
-      success: false,
-      message: "Internal server error",
-    });
+    return c.json(
+      {
+        success: false,
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
+      },
+      500
+    );
   }
 };
 
@@ -159,10 +176,16 @@ export const getOneCheckoutUser = async (c: Context) => {
       data: checkout,
     });
   } catch (err) {
-    return c.json({
-      success: false,
-      message: "Internal server error",
-    });
+    return c.json(
+      {
+        success: false,
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
+      },
+      500
+    );
   }
 };
 
@@ -320,13 +343,16 @@ export const createCheckout = async (c: Context) => {
       message: "Success add checkout",
     });
   } catch (err) {
-    return c.json({
-      success: false,
-      message:
-        err instanceof Error
-          ? err.message
-          : String(err) || "Internal server error",
-    });
+    return c.json(
+      {
+        success: false,
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
+      },
+      500
+    );
   }
 };
 
@@ -394,12 +420,15 @@ export const createStatusCheckout = async (c: Context) => {
       message: "Success add status",
     });
   } catch (err) {
-    return c.json({
-      success: false,
-      message:
-        err instanceof Error
-          ? err.message
-          : String(err) || "Internal server error",
-    });
+    return c.json(
+      {
+        success: false,
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
+      },
+      500
+    );
   }
 };

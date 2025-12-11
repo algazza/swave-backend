@@ -5,7 +5,7 @@ import { CategoryRequest } from "../types/category";
 export const getAllCategory = async (c: Context) => {
   try {
     const categoryData = await prisma.categories.findMany({
-      select: { category: true, product: true, },
+      select: { category: true, product: true },
     });
 
     if (!categoryData || categoryData.length === 0) {
@@ -26,8 +26,10 @@ export const getAllCategory = async (c: Context) => {
     return c.json(
       {
         success: false,
-        message: "Internal server error",
-        error: err instanceof Error ? err.message : String(err),
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
       },
       500
     );
@@ -40,7 +42,7 @@ export const getOneCategory = async (c: Context) => {
 
     const categoryData = await prisma.categories.findUnique({
       where: { category: String(category) },
-      select: { category: true, product: true, },
+      select: { category: true, product: true },
     });
 
     if (!categoryData) {
@@ -61,7 +63,10 @@ export const getOneCategory = async (c: Context) => {
     return c.json(
       {
         success: false,
-        message: "Internal server error",
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
       },
       500
     );
@@ -95,7 +100,10 @@ export const createCategory = async (c: Context) => {
     return c.json(
       {
         success: false,
-        message: "Internal server error",
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
       },
       500
     );
@@ -135,8 +143,10 @@ export const updateCategory = async (c: Context) => {
     return c.json(
       {
         success: false,
-        message: "Internal server error",
-        error: err instanceof Error ? err.message : String(err),
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
       },
       500
     );
@@ -186,8 +196,10 @@ export const deleteCategory = async (c: Context) => {
     return c.json(
       {
         success: false,
-        message: "Internal server error",
-        error: err instanceof Error ? err.message : String(err),
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
       },
       500
     );

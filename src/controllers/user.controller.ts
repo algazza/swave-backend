@@ -23,8 +23,10 @@ export const getAllUser = async (c: Context) => {
     return c.json(
       {
         success: false,
-        message: "Internal server error",
-        error: err instanceof Error ? err.message : String(err),
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
       },
       500
     );
@@ -70,8 +72,10 @@ export const getOneUser = async (c: Context) => {
     return c.json(
       {
         success: false,
-        message: "Internal server error",
-        error: err instanceof Error ? err.message : String(err),
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
       },
       500
     );
@@ -144,8 +148,10 @@ export const updateUser = async (c: Context) => {
     return c.json(
       {
         success: false,
-        message: "Internal server error",
-        error: err instanceof Error ? err.message : String(err),
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
       },
       500
     );
@@ -184,8 +190,10 @@ export const deleteUser = async (c: Context) => {
     return c.json(
       {
         success: false,
-        message: "Internal server error",
-        error: err instanceof Error ? err.message : String(err),
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
       },
       500
     );

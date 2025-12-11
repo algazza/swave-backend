@@ -26,7 +26,10 @@ export const getAllCart = async (c: Context) => {
     return c.json(
       {
         success: false,
-        message: "Internal server error",
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
       },
       500
     );
@@ -104,9 +107,9 @@ export const addCart = async (c: Context) => {
       });
     }
 
-    const maxValue = variant.stock
-    const fixQuantity = maxValue < quantity ? maxValue : quantity
-    const price = variant.price * fixQuantity
+    const maxValue = variant.stock;
+    const fixQuantity = maxValue < quantity ? maxValue : quantity;
+    const price = variant.price * fixQuantity;
 
     await prisma.carts.create({
       data: {
@@ -138,7 +141,10 @@ export const addCart = async (c: Context) => {
     return c.json(
       {
         success: false,
-        message: "Internal server error",
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
       },
       500
     );
@@ -156,7 +162,7 @@ export const updateCart = async (c: Context) => {
         variant: {
           select: {
             stock: true,
-            price: true
+            price: true,
           },
         },
       },
@@ -171,8 +177,8 @@ export const updateCart = async (c: Context) => {
 
     const { quantity } = c.get("validatedBody") as UpdateCartRequest;
     const maxValue = cart.variant.stock;
-    const fixQuantity = maxValue < quantity ? maxValue : quantity
-    const price = cart.variant.price * fixQuantity
+    const fixQuantity = maxValue < quantity ? maxValue : quantity;
+    const price = cart.variant.price * fixQuantity;
 
     await prisma.carts.update({
       where: { id: Number(id) },
@@ -190,7 +196,10 @@ export const updateCart = async (c: Context) => {
     return c.json(
       {
         success: false,
-        message: "Internal server error",
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
       },
       500
     );
@@ -224,7 +233,10 @@ export const deleteCart = async (c: Context) => {
     return c.json(
       {
         success: false,
-        message: "Internal server error",
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
       },
       500
     );

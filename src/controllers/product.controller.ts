@@ -57,7 +57,10 @@ export const getAllProduct = async (c: Context) => {
     return c.json(
       {
         success: false,
-        message: "Internal server error",
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
       },
       500
     );
@@ -124,7 +127,10 @@ export const getOneProduct = async (c: Context) => {
     return c.json(
       {
         success: false,
-        message: "Internal server error",
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
       },
       500
     );
@@ -208,8 +214,10 @@ export const createProduct = async (c: Context) => {
     return c.json(
       {
         success: false,
-        message: "Internal server error",
-        error: err instanceof Error ? err.message : String(err),
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
       },
       500
     );
@@ -259,11 +267,16 @@ export const deleteProduct = async (c: Context) => {
       message: "Success delete product",
     });
   } catch (err) {
-    return c.json({
-      success: false,
-      message: "Internal server error",
-      error: err instanceof Error ? err.message : String(err),
-    });
+    return c.json(
+      {
+        success: false,
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
+      },
+      500
+    );
   }
 };
 

@@ -52,13 +52,13 @@ export const signup = async (c: Context) => {
       token: token,
     });
   } catch (err) {
-    console.error(err);
-
     return c.json(
       {
         success: false,
-        message: "Internal server error",
-        error: err instanceof Error ? err.message : String(err),
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
       },
       500
     );
@@ -110,7 +110,10 @@ export const signin = async (c: Context) => {
     return c.json(
       {
         success: false,
-        message: "Internal server error",
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
       },
       500
     );

@@ -28,7 +28,10 @@ export const getVariantByCategory = async (c: Context) => {
     return c.json(
       {
         success: false,
-        message: "Internal server error",
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
       },
       500
     );
@@ -93,7 +96,10 @@ export const createVariant = async (c: Context) => {
     return c.json(
       {
         success: false,
-        message: "Internal server error",
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
       },
       500
     );
@@ -169,7 +175,10 @@ export const updateVariant = async (c: Context) => {
     return c.json(
       {
         success: false,
-        message: "Internal server error",
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
       },
       500
     );
@@ -222,7 +231,10 @@ export const deleteVaraint = async (c: Context) => {
     return c.json(
       {
         success: false,
-        message: "Internal server error",
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
       },
       500
     );

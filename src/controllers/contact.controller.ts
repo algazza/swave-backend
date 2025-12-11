@@ -18,7 +18,10 @@ export const getAllContact = async (c: Context) => {
     return c.json(
       {
         success: false,
-        message: "Internal server error",
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
       },
       500
     );
@@ -47,7 +50,10 @@ export const getOneContact = async (c: Context) => {
     return c.json(
       {
         success: false,
-        message: "Internal server error",
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
       },
       500
     );
@@ -73,10 +79,16 @@ export const createContact = async (c: Context) => {
       message: "Sucess add contact",
     });
   } catch (err) {
-    return c.json({
-      success: false,
-      message: "Internal server error",
-    });
+    return c.json(
+      {
+        success: false,
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
+      },
+      500
+    );
   }
 };
 
@@ -107,7 +119,10 @@ export const deleteContact = async (c: Context) => {
     return c.json(
       {
         success: false,
-        message: "Internal server error",
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
       },
       500
     );

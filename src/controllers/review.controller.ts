@@ -60,13 +60,16 @@ export const getHistoryReview = async (c: Context) => {
       data: review,
     });
   } catch (err) {
-    return c.json({
-      success: false,
-      message:
-        err instanceof Error
-          ? err.message
-          : String(err) || "Internal server error",
-    });
+    return c.json(
+      {
+        success: false,
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
+      },
+      500
+    );
   }
 };
 
@@ -130,13 +133,16 @@ export const getHistoryUnreview = async (c: Context) => {
       data: unReview,
     });
   } catch (err) {
-    return c.json({
-      success: false,
-      message:
-        err instanceof Error
-          ? err.message
-          : String(err) || "Internal server error",
-    });
+    return c.json(
+      {
+        success: false,
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
+      },
+      500
+    );
   }
 };
 
@@ -210,12 +216,15 @@ export const createReview = async (c: Context) => {
       message: "success add review",
     });
   } catch (err) {
-    return c.json({
-      success: false,
-      message:
-        err instanceof Error
-          ? err.message
-          : String(err) || "Internal server error",
-    });
+    return c.json(
+      {
+        success: false,
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
+      },
+      500
+    );
   }
 };
