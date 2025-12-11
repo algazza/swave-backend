@@ -1,5 +1,6 @@
 import { Hono } from "hono";
-import { verifyToken } from "../middlewares/auth.middleware";
+import { validateBody, verifyToken } from "../middlewares";
+import { addressSchema, updateAddressSchema } from "../schemas/address.schema";
 import {
   createAddress,
   deleteAddress,
@@ -7,8 +8,6 @@ import {
   getOneAddress,
   updateAddress,
 } from "../controllers/address.controller";
-import { validateBody } from "../middlewares/validate.middleware";
-import { addressSchema, updateAddressSchema } from "../schemas/address.schema";
 
 const router = new Hono();
 

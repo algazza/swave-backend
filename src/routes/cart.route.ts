@@ -1,8 +1,7 @@
 import { Hono } from "hono";
-import { verifyToken } from "../middlewares/auth.middleware";
-import { addCart, deleteCart, getAllCart, updateCart } from "../controllers/cart.controller";
-import { validateBody } from "../middlewares/validate.middleware";
+import { validateBody, verifyToken } from "../middlewares";
 import { addCartSchema, updateCartSchema } from "../schemas/cart.schema";
+import { addCart, deleteCart, getAllCart, updateCart } from "../controllers/cart.controller";
 
 const router = new Hono()
 

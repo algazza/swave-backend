@@ -1,8 +1,7 @@
 import { Hono } from "hono"
-import { createProduct, deleteProduct, getAllProduct, getOneProduct } from "../controllers/product.controller"
-import { verifyAdmin, verifyToken } from "../middlewares/auth.middleware"
-import { validateBody } from "../middlewares/validate.middleware"
+import { validateBody, verifyAdmin, verifyToken } from "../middlewares"
 import { AddProductSchema } from "../schemas/product.schema"
+import { createProduct, deleteProduct, getAllProduct, getOneProduct } from "../controllers/product.controller"
 
 const route = new Hono()
 

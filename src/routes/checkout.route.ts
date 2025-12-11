@@ -1,4 +1,6 @@
 import { Hono } from "hono";
+import { validateBody, verifyAdmin, verifyToken } from "../middlewares";
+import { addCheckoutSchema, addStatusSchema } from "../schemas/checkout.schema";
 import {
   createCheckout,
   createStatusCheckout,
@@ -7,9 +9,6 @@ import {
   getOneCheckoutAdmin,
   getOneCheckoutUser,
 } from "../controllers/checkout.controller";
-import { verifyAdmin, verifyToken } from "../middlewares/auth.middleware";
-import { validateBody } from "../middlewares/validate.middleware";
-import { addCheckoutSchema, addStatusSchema } from "../schemas/checkout.schema";
 
 const route = new Hono();
 

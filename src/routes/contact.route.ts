@@ -1,8 +1,7 @@
 import { Hono } from "hono";
-import { validateBody } from "../middlewares/validate.middleware";
+import { validateBody, verifyAdmin, verifyToken } from "../middlewares";
 import { contactSchema } from "../schemas/contact.schema";
 import { createContact, deleteContact, getAllContact, getOneContact } from "../controllers/contact.controller";
-import { verifyAdmin, verifyToken } from "../middlewares/auth.middleware";
 
 const route = new Hono()
 

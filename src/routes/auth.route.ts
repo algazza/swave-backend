@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { validateBody } from "../middlewares/validate.middleware";
+import { validateBody } from "../middlewares";
 import { loginSchema, registerSchema } from "../schemas/auth.schema";
 import { signin, signup } from "../controllers/auth.controller";
 

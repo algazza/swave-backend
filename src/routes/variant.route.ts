@@ -1,8 +1,7 @@
 import { Hono } from "hono";
-import { verifyAdmin, verifyToken } from "../middlewares/auth.middleware";
-import { createVariant, deleteVaraint, getVariantByCategory, updateVariant } from "../controllers/variant.controller";
-import { validateBody } from "../middlewares/validate.middleware";
+import { validateBody, verifyAdmin, verifyToken } from "../middlewares";
 import { addVariantSchema, updateVariantSchema } from "../schemas/variant.schema";
+import { createVariant, deleteVaraint, getVariantByCategory, updateVariant } from "../controllers/variant.controller";
 
 const route = new Hono()
 

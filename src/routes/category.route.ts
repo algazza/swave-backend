@@ -1,5 +1,6 @@
 import { Hono } from "hono";
-import { verifyAdmin, verifyToken } from "../middlewares/auth.middleware";
+import { validateBody, verifyAdmin, verifyToken } from "../middlewares";
+import { categorySchema } from "../schemas/category.schema";
 import {
   createCategory,
   deleteCategory,
@@ -7,8 +8,6 @@ import {
   getOneCategory,
   updateCategory,
 } from "../controllers/category.controller";
-import { validateBody } from "../middlewares/validate.middleware";
-import { categorySchema } from "../schemas/category.schema";
 
 const route = new Hono();
 
