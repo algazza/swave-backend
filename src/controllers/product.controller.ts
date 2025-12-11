@@ -4,7 +4,7 @@ import { rm } from "node:fs/promises";
 import tinify from "tinify";
 import prisma from "../../prisma/client";
 import { AddProductRequest } from "../types/product";
-import { slugify } from "../utils/slugify";
+import { slugify } from "../utils";
 
 tinify.key = process.env.TINIFY_API_KEY || "";
 

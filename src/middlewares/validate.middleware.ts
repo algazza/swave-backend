@@ -1,6 +1,6 @@
 import { MiddlewareHandler } from "hono";
 import z from "zod";
-import { formatZodErrors } from "../utils/validation";
+import { formatZodErrors } from "../utils";
 
 export const validateBody = <T extends z.ZodTypeAny>(
   schema: T
