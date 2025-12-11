@@ -1,15 +1,18 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { serveStatic } from "hono/bun";
-import { authRoute } from "./routes/auth.route";
-import { userRoute } from "./routes/user.route";
-import { AddressRoute } from "./routes/address.route";
-import { categoryRoute } from "./routes/category.route";
-import { variantRoute } from "./routes/variant.route";
-import { productRoute } from "./routes/product.route";
-import { contactRoute } from "./routes/contact.route";
-import { cartRoute } from "./routes/cart.route";
-import { checkoutRoute } from "./routes/checkout.route";
+import {
+  AddressRoute,
+  authRoute,
+  cartRoute,
+  categoryRoute,
+  checkoutRoute,
+  contactRoute,
+  productRoute,
+  reviewRoute,
+  userRoute,
+  variantRoute,
+} from "./routes";
 
 const port = process.env.PORT || 3000;
 const app = new Hono();
@@ -25,6 +28,7 @@ app.route("/api/variant", variantRoute);
 app.route("/api/product", productRoute);
 app.route("/api/cart", cartRoute);
 app.route("/api/checkout", checkoutRoute);
+app.route("/api/account", reviewRoute);
 app.route("/api/contact", contactRoute);
 
 export default {
