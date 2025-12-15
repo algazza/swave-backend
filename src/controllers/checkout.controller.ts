@@ -414,7 +414,7 @@ export const createStatusCheckout = async (c: Context) => {
         },
       },
     });
-    if (order_status === "cancel") {
+    if (order_status === "cancelled") {
       checkout.product_checkout.map(async (p) => {
         await prisma.products.update({
           where: { id: p.product_id },

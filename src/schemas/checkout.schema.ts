@@ -1,8 +1,9 @@
 import z from "zod";
 import { addCartSchema } from "./cart.schema";
+import { OrderStatus } from "../../prisma/generated/prisma/enums";
 
 export const addStatusSchema = z.object({
-  order_status: z.enum(["pending", "packaged", "delivery", "cancel", "success"]),
+  order_status: z.enum(OrderStatus),
   description: z.string().optional(),
   created_at: z.string().datetime().optional(),
 });
