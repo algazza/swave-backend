@@ -89,7 +89,7 @@ export const getHistoryUnreview = async (c: Context) => {
           },
           take: 1,
           select: {
-            status_type: true,
+            order_status: true,
           },
         },
         product_checkout: {
@@ -176,7 +176,7 @@ export const createReview = async (c: Context) => {
       });
     }
 
-    if (!checkout.status.find((s) => s.status_type === "success")) {
+    if (!checkout.status.find((s) => s.order_status === "success")) {
       return c.json({
         success: false,
         message: "you cant review until completed",

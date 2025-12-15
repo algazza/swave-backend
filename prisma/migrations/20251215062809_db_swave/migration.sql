@@ -22,6 +22,8 @@ CREATE TABLE `address` (
     `address` VARCHAR(191) NOT NULL,
     `main_address` BOOLEAN NOT NULL,
     `user_id` INTEGER NOT NULL,
+    `longitude` VARCHAR(191) NULL,
+    `latitude` VARCHAR(191) NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -125,7 +127,8 @@ CREATE TABLE `checkouts` (
 -- CreateTable
 CREATE TABLE `status` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `status_type` ENUM('pending', 'packaged', 'delivery', 'cancel', 'success') NOT NULL,
+    `payment_status` ENUM('pending', 'paid', 'expired', 'failed', 'refunded') NULL,
+    `order_status` ENUM('pending', 'processing', 'delivery', 'success', 'cancelled') NOT NULL,
     `description` VARCHAR(191) NULL,
     `checkout_id` INTEGER NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),

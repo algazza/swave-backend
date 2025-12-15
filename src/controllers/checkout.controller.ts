@@ -1,6 +1,7 @@
 import { Context } from "hono";
 import prisma from "../../prisma/client";
 import { AddCheckoutRequest, UpdateStatusRequest } from "../types/checkout";
+import { snap } from "../service/midtrans";
 
 export const getAllCheckout = async (c: Context) => {
   try {
@@ -18,7 +19,7 @@ export const getAllCheckout = async (c: Context) => {
           },
           take: 1,
           select: {
-            status_type: true,
+            order_status: true,
           },
         },
         delivery: {
@@ -33,7 +34,7 @@ export const getAllCheckout = async (c: Context) => {
     const checkoutJson = checkout.map((item) => ({
       order_id: item.order_id,
       name: item.user.name,
-      status: item.status[0].status_type,
+      status: item.status[0].order_status,
       delivery: item.delivery.delivery_type,
       amount: item.total_price,
     }));
@@ -71,7 +72,7 @@ export const getHistoryCheckout = async (c: Context) => {
           },
           take: 1,
           select: {
-            status_type: true,
+            order_status: true,
           },
         },
         product_checkout: true,
@@ -213,7 +214,7 @@ export const createCheckout = async (c: Context) => {
       });
     }
 
-    await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx) => {
       const variantItems = await Promise.all(
         product_checkout.map(async (p) => {
           const variant = await tx.variants.findUnique({
@@ -241,6 +242,7 @@ export const createCheckout = async (c: Context) => {
           const cart = await tx.carts.findFirst({
             where: {
               product_id: p.product_id,
+              quantity: p.quantity,
               variant_id: p.variant_id,
               user_id: userId,
             },
@@ -287,9 +289,11 @@ export const createCheckout = async (c: Context) => {
         0
       );
 
-      await tx.checkouts.create({
+      const order_id = `ORD-${Date.now()}${Math.floor(Math.random() * 1000)}`
+
+      const checkout = await tx.checkouts.create({
         data: {
-          order_id: `ORD-${Date.now()}${Math.floor(Math.random() * 1000)}`,
+          order_id,
           description,
           gift_card,
           gift_description,
@@ -297,7 +301,8 @@ export const createCheckout = async (c: Context) => {
           total_price,
           status: {
             create: {
-              status_type: "pending",
+              payment_status: 'pending',
+              order_status: "pending",
             },
           },
           delivery: {
@@ -336,11 +341,35 @@ export const createCheckout = async (c: Context) => {
           },
         },
       });
+
+      return {
+        checkoutId: checkout.id,
+        orderId: order_id,
+        totalPrice: total_price
+      }
     });
+
+    const snapTransaction = await snap.createTransaction({
+      transaction_details: {
+        order_id: result.orderId,
+        gross_amount: result.totalPrice
+      },
+    })
+    
+    await prisma.checkouts.update({
+      where: {id: result.checkoutId},
+      data: {
+        snap_token: snapTransaction.token
+      }
+    })
 
     return c.json({
       success: true,
       message: "Success add checkout",
+      data: {
+        order_id: result.orderId,
+        snap_token: snapTransaction.token
+      }
     });
   } catch (err) {
     return c.json(
@@ -371,13 +400,13 @@ export const createStatusCheckout = async (c: Context) => {
       });
     }
 
-    const { status_type, description, created_at } = c.get(
+    const { order_status, description, created_at } = c.get(
       "validatedBody"
     ) as UpdateStatusRequest;
 
     await prisma.status.create({
       data: {
-        status_type,
+        order_status,
         description,
         created_at,
         checkout: {
@@ -387,7 +416,7 @@ export const createStatusCheckout = async (c: Context) => {
         },
       },
     });
-    if (status_type === "cancel") {
+    if (order_status === "cancelled") {
       checkout.product_checkout.map(async (p) => {
         await prisma.products.update({
           where: { id: p.product_id },

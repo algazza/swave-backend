@@ -39,6 +39,13 @@ export const signup = async (c: Context) => {
       data: { name, username, phone, password: hashedPassword },
     });
 
+    if (user.id === 1) {
+      await prisma.users.update({
+        where: { id: user.id },
+        data: { role: "admin" },
+      });
+    }
+
     const payload = {
       role: user.role,
       sub: user.id,
