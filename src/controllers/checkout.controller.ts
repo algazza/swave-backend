@@ -1,6 +1,7 @@
 import { Context } from "hono";
 import prisma from "../../prisma/client";
 import { AddCheckoutRequest, UpdateStatusRequest } from "../types/checkout";
+import { snap } from "../service/midtrans";
 
 export const getAllCheckout = async (c: Context) => {
   try {
@@ -213,7 +214,7 @@ export const createCheckout = async (c: Context) => {
       });
     }
 
-    await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx) => {
       const variantItems = await Promise.all(
         product_checkout.map(async (p) => {
           const variant = await tx.variants.findUnique({
@@ -287,9 +288,11 @@ export const createCheckout = async (c: Context) => {
         0
       );
 
-      await tx.checkouts.create({
+      const order_id = `ORD-${Date.now()}${Math.floor(Math.random() * 1000)}`
+
+      const checkout = await tx.checkouts.create({
         data: {
-          order_id: `ORD-${Date.now()}${Math.floor(Math.random() * 1000)}`,
+          order_id,
           description,
           gift_card,
           gift_description,
@@ -336,11 +339,35 @@ export const createCheckout = async (c: Context) => {
           },
         },
       });
+
+      return {
+        checkoutId: checkout.id,
+        orderId: order_id,
+        totalPrice: total_price
+      }
     });
+
+    const snapTransaction = await snap.createTransaction({
+      transaction_details: {
+        order_id: result.orderId,
+        gross_amount: result.totalPrice
+      },
+    })
+    
+    await prisma.checkouts.update({
+      where: {id: result.checkoutId},
+      data: {
+        snap_token: snapTransaction.token
+      }
+    })
 
     return c.json({
       success: true,
       message: "Success add checkout",
+      data: {
+        order_id: result.orderId,
+        snap_token: snapTransaction.token
+      }
     });
   } catch (err) {
     return c.json(
