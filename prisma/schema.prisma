@@ -75,6 +75,7 @@ model address {
   user_id      Int
   longitude    String?
   latitude     String?
+  description  String?
 
   user     users        @relation(fields: [user_id], references: [id])
   delivery deliveries[]
