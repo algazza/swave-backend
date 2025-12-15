@@ -127,8 +127,8 @@ CREATE TABLE `checkouts` (
 -- CreateTable
 CREATE TABLE `status` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `payment_status` ENUM('waiting_payment', 'processing', 'shipped', 'delivered', 'cancelled') NULL,
-    `order_status` ENUM('pending', 'packaged', 'delivery', 'cancel', 'success') NOT NULL,
+    `payment_status` ENUM('pending', 'paid', 'expired', 'failed', 'refunded') NULL,
+    `order_status` ENUM('pending', 'processing', 'delivery', 'success', 'cancelled') NOT NULL,
     `description` VARCHAR(191) NULL,
     `checkout_id` INTEGER NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),

@@ -32,19 +32,19 @@ enum Delivery {
   pickup
 }
 
-enum OrderStatus {
+enum PaymentStatus {
   pending
-  packaged
-  delivery
-  cancel
-  success
+  paid
+  expired
+  failed
+  refunded
 }
 
-enum PaymentStatus {
-  waiting_payment
+enum OrderStatus {
+  pending
   processing
-  shipped
-  delivered
+  delivery
+  success
   cancelled
 }
 
