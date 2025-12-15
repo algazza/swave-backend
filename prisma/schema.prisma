@@ -32,12 +32,20 @@ enum Delivery {
   pickup
 }
 
-enum Status {
+enum OrderStatus {
   pending
   packaged
   delivery
   cancel
   success
+}
+
+enum PaymentStatus {
+  waiting_payment
+  processing
+  shipped
+  delivered
+  cancelled
 }
 
 model users {
@@ -65,6 +73,8 @@ model address {
   address      String
   main_address Boolean
   user_id      Int
+  longitude    String?
+  latitude     String?
 
   user     users        @relation(fields: [user_id], references: [id])
   delivery deliveries[]
@@ -173,13 +183,14 @@ model checkouts {
 }
 
 model status {
-  id Int @id @default(autoincrement())
-  status_type Status
-  description String?
-  checkout_id Int
-  created_at DateTime @default(now())
+  id             Int             @id @default(autoincrement())
+  payment_status PaymentStatus?
+  order_status   OrderStatus
+  description    String?
+  checkout_id    Int
+  created_at     DateTime        @default(now())
 
-  checkout checkouts @relation(fields: [checkout_id], references: [id])
+  checkout       checkouts       @relation(fields: [checkout_id], references: [id])
 }
 
 model reviews {
