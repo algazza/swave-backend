@@ -242,6 +242,7 @@ export const createCheckout = async (c: Context) => {
           const cart = await tx.carts.findFirst({
             where: {
               product_id: p.product_id,
+              quantity: p.quantity,
               variant_id: p.variant_id,
               user_id: userId,
             },
@@ -300,6 +301,7 @@ export const createCheckout = async (c: Context) => {
           total_price,
           status: {
             create: {
+              payment_status: 'pending',
               order_status: "pending",
             },
           },

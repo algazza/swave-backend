@@ -8,4 +8,5 @@ export * from "./contact.route";
 export * from "./cart.route";
 export * from "./checkout.route";
 export * from "./review.route";
+export * from "./midtrans.route";
 
