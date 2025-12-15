@@ -2,7 +2,7 @@ import z from "zod";
 import { addCartSchema } from "./cart.schema";
 
 export const addStatusSchema = z.object({
-  status_type: z.enum(["pending", "packaged", "delivery", "cancel", "success"]),
+  order_status: z.enum(["pending", "packaged", "delivery", "cancel", "success"]),
   description: z.string().optional(),
   created_at: z.string().datetime().optional(),
 });

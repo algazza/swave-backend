@@ -19,7 +19,7 @@ export const getAllCheckout = async (c: Context) => {
           },
           take: 1,
           select: {
-            status_type: true,
+            order_status: true,
           },
         },
         delivery: {
@@ -34,7 +34,7 @@ export const getAllCheckout = async (c: Context) => {
     const checkoutJson = checkout.map((item) => ({
       order_id: item.order_id,
       name: item.user.name,
-      status: item.status[0].status_type,
+      status: item.status[0].order_status,
       delivery: item.delivery.delivery_type,
       amount: item.total_price,
     }));
@@ -72,7 +72,7 @@ export const getHistoryCheckout = async (c: Context) => {
           },
           take: 1,
           select: {
-            status_type: true,
+            order_status: true,
           },
         },
         product_checkout: true,
@@ -300,7 +300,7 @@ export const createCheckout = async (c: Context) => {
           total_price,
           status: {
             create: {
-              status_type: "pending",
+              order_status: "pending",
             },
           },
           delivery: {
@@ -398,13 +398,13 @@ export const createStatusCheckout = async (c: Context) => {
       });
     }
 
-    const { status_type, description, created_at } = c.get(
+    const { order_status, description, created_at } = c.get(
       "validatedBody"
     ) as UpdateStatusRequest;
 
     await prisma.status.create({
       data: {
-        status_type,
+        order_status,
         description,
         created_at,
         checkout: {
@@ -414,7 +414,7 @@ export const createStatusCheckout = async (c: Context) => {
         },
       },
     });
-    if (status_type === "cancel") {
+    if (order_status === "cancel") {
       checkout.product_checkout.map(async (p) => {
         await prisma.products.update({
           where: { id: p.product_id },
