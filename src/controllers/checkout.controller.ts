@@ -2,6 +2,8 @@ import { Context } from "hono";
 import prisma from "../../prisma/client";
 import { AddCheckoutRequest, UpdateStatusRequest } from "../types/checkout";
 import { snap } from "../service/midtrans";
+import { getDistance } from "./address.controller";
+import { distanceLocation } from "../service/location";
 
 export const getAllCheckout = async (c: Context) => {
   try {
@@ -190,7 +192,6 @@ export const getOneCheckoutUser = async (c: Context) => {
   }
 };
 
-// TODO: do checkout again and add midtrans
 export const createCheckout = async (c: Context) => {
   try {
     const userId = c.get("userId");
@@ -205,6 +206,10 @@ export const createCheckout = async (c: Context) => {
 
     const address = await prisma.address.findUnique({
       where: { id: delivery.address_id, user_id: userId },
+      select: {
+        longitude: true,
+        latitude: true,
+      },
     });
 
     if (!address) {
@@ -213,6 +218,30 @@ export const createCheckout = async (c: Context) => {
         message: "Address not found",
       });
     }
+
+    const adminAddress = await prisma.address.findFirst({
+      where: { user_id: 1 },
+      select: {
+        latitude: true,
+        longitude: true,
+      },
+    });
+
+    if (!adminAddress) {
+      return c.json({
+        success: false,
+        message: "address admin not found",
+      });
+    }
+
+    const res = await distanceLocation(
+      adminAddress.longitude,
+      adminAddress.latitude,
+      address.longitude,
+      address.latitude
+    );
+
+    const distanceRound = Math.round(res / 1000) * 1000;
 
     const result = await prisma.$transaction(async (tx) => {
       const variantItems = await Promise.all(
@@ -284,12 +313,11 @@ export const createCheckout = async (c: Context) => {
         })
       );
 
-      const total_price = variantItems.reduce(
-        (acc, item) => acc + item.subtotal,
-        0
-      );
+      const total_price =
+        variantItems.reduce((acc, item) => acc + item.subtotal, 0) +
+        distanceRound * 2;
 
-      const order_id = `ORD-${Date.now()}${Math.floor(Math.random() * 1000)}`
+      const order_id = `ORD-${Date.now()}${Math.floor(Math.random() * 1000)}`;
 
       const checkout = await tx.checkouts.create({
         data: {
@@ -298,10 +326,10 @@ export const createCheckout = async (c: Context) => {
           gift_card,
           gift_description,
           estimation: String(new Date(Date.now() + 3 * 86400000)),
-          total_price,
+          total_price: total_price,
           status: {
             create: {
-              payment_status: 'pending',
+              payment_status: "pending",
               order_status: "pending",
             },
           },
@@ -345,31 +373,31 @@ export const createCheckout = async (c: Context) => {
       return {
         checkoutId: checkout.id,
         orderId: order_id,
-        totalPrice: total_price
-      }
+        totalPrice: total_price,
+      };
     });
 
     const snapTransaction = await snap.createTransaction({
       transaction_details: {
         order_id: result.orderId,
-        gross_amount: result.totalPrice
+        gross_amount: result.totalPrice,
       },
-    })
-    
+    });
+
     await prisma.checkouts.update({
-      where: {id: result.checkoutId},
+      where: { id: result.checkoutId },
       data: {
-        snap_token: snapTransaction.token
-      }
-    })
+        snap_token: snapTransaction.token,
+      },
+    });
 
     return c.json({
       success: true,
       message: "Success add checkout",
       data: {
         order_id: result.orderId,
-        snap_token: snapTransaction.token
-      }
+        snap_token: snapTransaction.token,
+      },
     });
   } catch (err) {
     return c.json(
