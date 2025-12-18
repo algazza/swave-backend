@@ -18,7 +18,15 @@ import {
 const port = process.env.PORT || 3000;
 const app = new Hono();
 
-app.use("*", cors());
+app.use(
+  "*",
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use("/images/*", serveStatic({ root: "./" }));
 
 app.route("/api/auth", authRoute);
