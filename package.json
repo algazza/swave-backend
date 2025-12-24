@@ -18,5 +18,8 @@
   "devDependencies": {
     "@types/bun": "latest",
     "prisma": "6.18.0"
+  },
+  "prisma": {
+    "seed": "bun run prisma/seeder/index.ts"
   }
 }

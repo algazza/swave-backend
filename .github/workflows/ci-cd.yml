@@ -44,9 +44,6 @@ jobs:
           docker compose ps
           docker compose logs api
 
-      - name: Run Prisma migrations
-        run: docker compose exec -T api bunx prisma migrate deploy
-
       - name: Verify API is running
         run: |
           # Check if the container is running
