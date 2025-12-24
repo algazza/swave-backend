@@ -111,7 +111,7 @@ export const updateUser = async (c: Context) => {
     if (existing) {
       const conflictField =
         existing.username === username
-          ? "Username"
+          ? "username"
           : existing.phone === phone
           ? "phone"
           : "username";

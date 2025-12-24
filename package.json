@@ -3,7 +3,8 @@
   "scripts": {
     "dev": "bun run --hot src/index.ts",
     "build": "bun build src/index.ts",
-    "lint": "bunx biome lint src/"
+    "lint": "bunx biome lint src/",
+    "seed": "bun run prisma/seeder/index.ts"
   },
   "dependencies": {
     "@faker-js/faker": "^10.1.0",
