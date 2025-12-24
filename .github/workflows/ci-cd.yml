@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: ['**']
+    branches: ["**"]
   pull_request:
-    branches: ['**']
+    branches: ["**"]
 
 jobs:
   build-and-test:
@@ -14,56 +14,68 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Create .env file
+        env:
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
         run: |
-          echo "DATABASE_URL=mysql://root:rendang@db:3306/db_swave" >> .env
-          echo "MYSQL_PASSWORD=rendang" >> .env
+          if [ -z "$MYSQL_PASSWORD" ]; then
+            echo "Missing secret MYSQL_PASSWORD. Set it in repo Settings → Secrets and variables → Actions." >&2
+            exit 1
+          fi
+          cat > .env << 'EOF'
+          MYSQL_PASSWORD=${MYSQL_PASSWORD}
+          DATABASE_URL=mysql://root:${MYSQL_PASSWORD}@db:3306/db_swave
+          PORT=5500
+          EOF
 
       - name: Build Docker images
-        run: docker-compose build
+        run: docker compose build
 
       - name: Start services
-        run: docker-compose up -d
+        run: docker compose up -d
 
       - name: Wait for database to be ready
         run: |
           echo "Waiting for database to be ready..."
-          timeout 60 bash -c 'until docker-compose exec -T db mysqladmin ping -h localhost --silent; do sleep 2; done'
+          timeout 60 bash -c 'until docker compose exec -T db mysqladmin ping -h localhost --silent; do sleep 2; done'
           echo "Database is ready!"
 
       - name: Check API service health
         run: |
           echo "Waiting for API service to be ready..."
           sleep 10
-          docker-compose ps
-          docker-compose logs api
+          docker compose ps
+          docker compose logs api
 
       - name: Run Prisma migrations
-        run: docker-compose exec -T api bunx prisma migrate deploy
+        run: docker compose exec -T api bunx prisma migrate deploy
 
       - name: Verify API is running
         run: |
           # Check if the container is running
-          if [ "$(docker-compose ps -q api | wc -l)" -eq 0 ]; then
+          if [ "$(docker compose ps -q api | wc -l)" -eq 0 ]; then
             echo "API container is not running"
-            docker-compose logs api
+            docker compose logs api
             exit 1
           fi
-          
+
           # Optional: Add a health check endpoint test
-          # docker-compose exec -T api curl -f http://localhost:5500/health || exit 1
+          # docker compose exec -T api curl -f http://localhost:5500/health || exit 1
 
       - name: Show logs on failure
         if: failure()
         run: |
           echo "=== API Logs ==="
-          docker-compose logs api
+          docker compose logs api
           echo "=== DB Logs ==="
-          docker-compose logs db
+          docker compose logs db
 
       - name: Stop services
         if: always()
-        run: docker-compose down -v
+        run: docker compose down -v
 
   lint:
     runs-on: ubuntu-latest
