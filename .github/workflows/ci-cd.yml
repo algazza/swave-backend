@@ -18,16 +18,10 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Create .env file
-        env:
-          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
         run: |
-          if [ -z "$MYSQL_PASSWORD" ]; then
-            echo "Missing secret MYSQL_PASSWORD. Set it in repo Settings → Secrets and variables → Actions." >&2
-            exit 1
-          fi
           cat > .env << 'EOF'
-          MYSQL_PASSWORD=${MYSQL_PASSWORD}
-          DATABASE_URL=mysql://root:${MYSQL_PASSWORD}@db:3306/db_swave
+          MYSQL_PASSWORD=rendang
+          DATABASE_URL=mysql://root:rendang@db:3306/db_swave
           PORT=5500
           EOF
 
