@@ -1,7 +1,9 @@
 {
   "name": "swave-backend",
   "scripts": {
-    "dev": "bun run --hot src/index.ts"
+    "dev": "bun run --hot src/index.ts",
+    "build": "bun build src/index.ts",
+    "lint": "bunx biome lint src/"
   },
   "dependencies": {
     "@faker-js/faker": "^10.1.0",
