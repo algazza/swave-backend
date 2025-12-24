@@ -1,0 +1,24 @@
+services:
+  api:
+    build: .
+    ports:
+      - "5500:5500"
+    depends_on:
+      - db
+    env_file:
+      - .env
+    command: >
+      sh -c "
+      bunx prisma migrate deploy &&
+      bun run dev
+      "
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: db_swave
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+volumes:
+  mysql-data:
