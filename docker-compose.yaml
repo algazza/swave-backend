@@ -4,15 +4,12 @@ services:
     ports:
       - "5500:5500"
     depends_on:
-      db:
-        condition: service_healthy
+      - db
     env_file:
       - .env
     command: >
       sh -c "
-      until mysqladmin ping -h db -uroot -p$MYSQL_PASSWORD --silent; do sleep 2; done &&
       bunx prisma migrate deploy &&
-      bunx prisma db seed &&
       bun run dev
       "
   db:
@@ -22,16 +19,6 @@ services:
       MYSQL_DATABASE: db_swave
     volumes:
       - mysql-data:/var/lib/mysql
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "mysqladmin ping -h localhost -p$MYSQL_ROOT_PASSWORD --silent",
-        ]
-      interval: 5s
-      timeout: 5s
-      retries: 24
-      start_period: 10s
 
 volumes:
   mysql-data:
