@@ -11,12 +11,6 @@ export const getAllCart = async (c: Context) => {
         user_id: true,
       },
     });
-    if (!cart || cart.length === 0) {
-      return c.json({
-        success: true,
-        message: "Cart is empty",
-      });
-    }
 
     return c.json({
       success: true,

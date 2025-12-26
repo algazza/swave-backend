@@ -12,16 +12,6 @@ export const getAllAddress = async (c: Context) => {
       omit: { user_id: true },
     });
 
-    if (!address || address.length === 0) {
-      return c.json(
-        {
-          success: false,
-          message: "No address found with this user",
-        },
-        404
-      );
-    }
-
     return c.json({
       success: true,
       data: address,

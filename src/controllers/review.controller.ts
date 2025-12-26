@@ -48,13 +48,6 @@ export const getHistoryReview = async (c: Context) => {
       },
     });
 
-    if (!review || review.length === 0) {
-      return c.json({
-        success: true,
-        message: "user doesnt have review",
-      });
-    }
-
     return c.json({
       success: true,
       data: review,
@@ -120,13 +113,6 @@ export const getHistoryUnreview = async (c: Context) => {
         },
       },
     });
-
-    if (!unReview || unReview.length === 0) {
-      return c.json({
-        success: true,
-        message: "no product to review",
-      });
-    }
 
     return c.json({
       success: true,

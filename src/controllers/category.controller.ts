@@ -8,16 +8,6 @@ export const getAllCategory = async (c: Context) => {
       select: { category: true, product: true },
     });
 
-    if (!categoryData || categoryData.length === 0) {
-      return c.json(
-        {
-          success: false,
-          message: "No category found",
-        },
-        404
-      );
-    }
-
     return c.json({
       success: true,
       data: categoryData,
