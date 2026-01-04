@@ -20,11 +20,10 @@ enum Role {
 }
 
 enum Label {
-  rumah
-  kantor
-  kos
-  sekolah
-  apartemen
+  Home
+  Office
+  School
+  Apartment
 }
 
 enum Delivery {
