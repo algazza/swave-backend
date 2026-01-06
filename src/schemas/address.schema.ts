@@ -8,6 +8,7 @@ export const addressSchema = z.object({
   zip_code: z.string().regex(/^\d{5}$/, "Must 5 digit"),
   address: z.string(),
   main_address: z.boolean(),
+  description: z.string().optional(),
 });
 
 export const updateAddressSchema = z.object({
@@ -23,4 +24,5 @@ export const updateAddressSchema = z.object({
     .optional(),
   address: z.string().optional(),
   main_address: z.boolean().optional(),
+  description: z.string().optional(),
 });

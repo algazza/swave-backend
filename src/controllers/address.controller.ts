@@ -143,6 +143,7 @@ export const createAddress = async (c: Context) => {
       zip_code,
       address,
       main_address,
+      description
     } = c.get("validatedBody") as AddAddressRequest;
 
     const res = await fowardLocation(address, city, zip_code)
@@ -158,6 +159,7 @@ export const createAddress = async (c: Context) => {
         main_address,
         latitude: res.lat,
         longitude: res.lon,
+        description,
 
         user: {
           connect: {
@@ -212,6 +214,7 @@ export const updateAddress = async (c: Context) => {
       zip_code,
       address,
       main_address,
+      description,
     } = c.get("validatedBody") as UpdateAddressRequest;
 
     await prisma.address.update({
@@ -224,6 +227,7 @@ export const updateAddress = async (c: Context) => {
         zip_code: Number(zip_code),
         address,
         main_address,
+        description,
       },
     });
 
