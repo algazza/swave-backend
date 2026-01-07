@@ -71,7 +71,7 @@ export const getOneAddress = async (c: Context) => {
 export const getDistance = async (c: Context) => {
   try {
     const userId = c.get("userId");
-    const addressId = c.req.param('id');
+    const addressId = c.req.param("id");
     const adminAddress = await prisma.address.findFirst({
       where: { user_id: 1 },
       select: {
@@ -106,7 +106,7 @@ export const getDistance = async (c: Context) => {
       adminAddress.longitude,
       adminAddress.latitude,
       userAddress.longitude,
-      userAddress.latitude,
+      userAddress.latitude
     );
 
     const distanceRound = Math.round(res / 1000) * 1000;
@@ -132,6 +132,7 @@ export const getDistance = async (c: Context) => {
   }
 };
 
+// FIXME: user only have 1 main address, check when update main_address to true
 export const createAddress = async (c: Context) => {
   try {
     const userId = c.get("userId");
@@ -143,11 +144,23 @@ export const createAddress = async (c: Context) => {
       zip_code,
       address,
       main_address,
-      description
+      description,
     } = c.get("validatedBody") as AddAddressRequest;
 
-    const res = await fowardLocation(address, city, zip_code)
-    
+    const res = await fowardLocation(address, city, zip_code);
+
+    const isMainAddress = await prisma.address.findFirst({
+      where: { user_id: userId, main_address: true },
+      select: { id: true },
+    });
+
+    if (main_address === true && isMainAddress) {
+      await prisma.address.update({
+        where: { id: isMainAddress.id },
+        data: { main_address: false },
+      });
+    }
+
     await prisma.address.create({
       data: {
         recipient,
@@ -194,6 +207,12 @@ export const updateAddress = async (c: Context) => {
 
     const isAddress = await prisma.address.findFirst({
       where: { id: Number(addressId), user_id: userId },
+      select: {
+        id: true,
+        city: true,
+        zip_code: true,
+        address: true,
+      },
     });
 
     if (!isAddress) {
@@ -216,6 +235,38 @@ export const updateAddress = async (c: Context) => {
       main_address,
       description,
     } = c.get("validatedBody") as UpdateAddressRequest;
+
+    const isMainAddress = await prisma.address.findFirst({
+      where: { user_id: userId, main_address: true },
+      select: { id: true },
+    });
+
+    if (main_address === true && isMainAddress) {
+      await prisma.address.update({
+        where: { id: isMainAddress.id },
+        data: { main_address: false },
+      });
+    }
+
+    if (
+      address !== isAddress.address ||
+      city !== isAddress.city ||
+      Number(zip_code) !== isAddress.zip_code
+    ) {
+      const res = await fowardLocation(
+        address || isAddress.address,
+        city || isAddress.city,
+        zip_code || String(isAddress.zip_code)
+      );
+
+      await prisma.address.update({
+        where: { id: Number(addressId) },
+        data: {
+          latitude: res.lat,
+          longitude: res.lon,
+        },
+      });
+    }
 
     await prisma.address.update({
       where: { id: Number(addressId) },
