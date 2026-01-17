@@ -77,13 +77,56 @@ export const getHistoryCheckout = async (c: Context) => {
             order_status: true,
           },
         },
-        product_checkout: true,
+        product_checkout: {
+          select: {
+            quantity: true,
+            price: true,
+            product: {
+              select: {
+                id: true,
+                name: true,
+                product_images: {
+                  take: 1,
+                  select: { image_path: true },
+                },
+                category: {
+                  select: {
+                    category: true,
+                  },
+                },
+              },
+            },
+            variant: {
+              select: {
+                variant: true,
+                price: true,
+              },
+            },
+          },
+        },
       },
     });
 
+    const checkoutJson = checkout.map((item) => ({
+      id: item.id,
+      order_id: item.order_id,
+      created_at: item.created_at,
+      status: item.status[0].order_status,
+      products: item.product_checkout.map((p) => ({
+        id: p.product.id,
+        category: p.product.category.category,
+        name: p.product.name,
+        image_path: p.product.product_images.map((img) => img.image_path)[0],
+        variant: p.variant.variant,
+        variant_price: p.variant.price,
+        quantity: p.quantity,
+        total_price: p.price,
+      })),
+    }));
+
     return c.json({
       success: true,
-      data: checkout,
+      data: checkoutJson,
     });
   } catch (err) {
     return c.json(
@@ -159,6 +202,33 @@ export const getOneCheckoutUser = async (c: Context) => {
           },
         },
         status: true,
+        product_checkout: {
+          select: {
+            quantity: true,
+            price: true,
+            product: {
+              select: {
+                id: true,
+                name: true,
+                product_images: {
+                  take: 1,
+                  select: { image_path: true },
+                },
+                category: {
+                  select: {
+                    category: true,
+                  },
+                },
+              },
+            },
+            variant: {
+              select: {
+                variant: true,
+                price: true,
+              },
+            },
+          },
+        },
       },
       omit: {
         user_id: true,
@@ -174,9 +244,23 @@ export const getOneCheckoutUser = async (c: Context) => {
       });
     }
 
+    const checkoutJson = {
+      ...checkout,
+      product_checkout: checkout.product_checkout.map((p) => ({
+        id: p.product.id,
+        category: p.product.category.category,
+        name: p.product.name,
+        image_path: p.product.product_images.map((img) => img.image_path)[0],
+        variant: p.variant.variant,
+        variant_price: p.variant.price,
+        quantity: p.quantity,
+        total_price: p.price,
+      })),
+    };
+
     return c.json({
       success: true,
-      data: checkout,
+      data: checkoutJson,
     });
   } catch (err) {
     return c.json(

@@ -4,11 +4,13 @@ import prisma from "../client";
 export const reviewSeeder = async () => {
   const checkouts = await prisma.checkouts.findMany({
     where: {
-      review: null,
       status: {
         some: {
           order_status: "success",
         },
+      },
+      review: {
+        none: {},
       },
     },
     select: {
@@ -30,6 +32,15 @@ export const reviewSeeder = async () => {
   for (const checkout of checkouts) {
     if (!checkout.product_checkout.length) {
       // Nothing to review
+      continue;
+    }
+
+    // Simulate user choice: not all successful checkouts get reviewed
+    const willReview = Math.random() < 0.7; // ~70% chance to create a review
+    if (!willReview) {
+      console.log(
+        `Skipping review for checkout ${checkout.id} (user chose not to review)`,
+      );
       continue;
     }
 
