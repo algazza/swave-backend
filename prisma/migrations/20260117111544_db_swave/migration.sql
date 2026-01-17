@@ -15,7 +15,7 @@ CREATE TABLE `users` (
 CREATE TABLE `address` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `recipient` VARCHAR(191) NOT NULL,
-    `label` ENUM('rumah', 'kantor', 'kos', 'sekolah', 'apartemen') NOT NULL,
+    `label` ENUM('Home', 'Office', 'School', 'Apartment') NOT NULL,
     `city` VARCHAR(191) NOT NULL,
     `subdistrict` VARCHAR(191) NOT NULL,
     `zip_code` INTEGER NOT NULL,
@@ -147,7 +147,6 @@ CREATE TABLE `reviews` (
     `checkout_id` INTEGER NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
-    UNIQUE INDEX `reviews_checkout_id_key`(`checkout_id`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 

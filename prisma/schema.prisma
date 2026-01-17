@@ -98,8 +98,8 @@ model products {
 }
 
 model product_images {
-  id         Int    @id @default(autoincrement())
-  image_path String
+  id          Int    @id @default(autoincrement())
+  image_path  String
   product_id  Int
 
   product products @relation(fields: [product_id], references: [id])
@@ -179,7 +179,7 @@ model checkouts {
   delivery         deliveries @relation(fields: [delevery_id], references: [id])
   status           status[]
   product_checkout product_checkouts[]
-  review           reviews?
+  review           reviews[]
 }
 
 model status {
@@ -194,13 +194,13 @@ model status {
 }
 
 model reviews {
-  id Int @id @default(autoincrement())
-  star Int 
+  id          Int      @id @default(autoincrement())
+  star        Int 
   description String
-  product_id Int
-  user_id Int
-  checkout_id Int @unique
-  created_at DateTime @default(now())
+  product_id  Int
+  user_id     Int
+  checkout_id Int      
+  created_at  DateTime @default(now())
 
   product  products   @relation(fields: [product_id], references: [id])
   user     users      @relation(fields: [user_id], references: [id])
@@ -208,18 +208,18 @@ model reviews {
 }
 
 model insight_products {
-  id Int @id @default(autoincrement())
-  user_id Int
-  product_id Int
+  id          Int @id @default(autoincrement())
+  user_id     Int
+  product_id  Int
 
   product  products   @relation(fields: [product_id], references: [id])
   user     users      @relation(fields: [user_id], references: [id])
 }
 
 model contacts {
-  id Int @id @default(autoincrement())
-  name String
-  email String
-  topic String
-  description String
+  id            Int @id @default(autoincrement())
+  name          String
+  email         String
+  topic         String
+  description   String
 }
