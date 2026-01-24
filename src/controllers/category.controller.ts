@@ -5,12 +5,16 @@ import { CategoryRequest } from "../types/category";
 export const getAllCategory = async (c: Context) => {
   try {
     const categoryData = await prisma.categories.findMany({
-      select: { category: true, product: true },
+      select: { category: true },
     });
+
+    const categoryJson = categoryData
+      .map((cat) => cat.category)
+      .sort((a, b) => a.localeCompare(b, "id", { sensitivity: "base" }));
 
     return c.json({
       success: true,
-      data: categoryData,
+      data: categoryJson,
     });
   } catch (err) {
     return c.json(
@@ -21,7 +25,7 @@ export const getAllCategory = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };
@@ -41,7 +45,7 @@ export const getOneCategory = async (c: Context) => {
           success: false,
           message: "Category not found",
         },
-        401
+        401,
       );
     }
 
@@ -58,7 +62,7 @@ export const getOneCategory = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };
@@ -95,7 +99,7 @@ export const createCategory = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };
@@ -114,7 +118,7 @@ export const updateCategory = async (c: Context) => {
           success: false,
           message: "Category not found",
         },
-        401
+        401,
       );
     }
 
@@ -138,7 +142,7 @@ export const updateCategory = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };
@@ -158,7 +162,7 @@ export const deleteCategory = async (c: Context) => {
           success: false,
           message: "Category not found",
         },
-        401
+        401,
       );
     }
 
@@ -191,7 +195,7 @@ export const deleteCategory = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };
