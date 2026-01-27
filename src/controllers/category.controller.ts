@@ -5,13 +5,18 @@ import { CategoryRequest } from "../types/category";
 export const getAllCategory = async (c: Context) => {
   try {
     const categoryData = await prisma.categories.findMany({
-      select: { category: true },
+      select: { category: true, product: { select: { id: true } } },
     });
 
     const categoryJson = categoryData
-      .map((cat) => cat.category)
-      .sort((a, b) => a.localeCompare(b, "id", { sensitivity: "base" }));
-
+      .map((item) => ({
+        category: item.category,
+        count: item.product.length,
+      }))
+      .sort((a, b) =>
+        a.category.localeCompare(b.category, "id", { sensitivity: "base" }),
+      );
+      
     return c.json({
       success: true,
       data: categoryJson,

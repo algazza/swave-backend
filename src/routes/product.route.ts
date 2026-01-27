@@ -1,13 +1,34 @@
-import { Hono } from "hono"
-import { validateBody, verifyAdmin, verifyToken } from "../middlewares"
-import { AddProductSchema } from "../schemas/product.schema"
-import { createProduct, deleteProduct, getAllProduct, getOneProduct } from "../controllers/product.controller"
+import { Hono } from "hono";
+import { validateBody, verifyAdmin, verifyToken } from "../middlewares";
+import { AddProductSchema, emptyBodySchema, UpdateProductSchema } from "../schemas/product.schema";
+import {
+  addProductImage,
+  createProduct,
+  deleteProduct,
+  deleteProductImage,
+  getAllProduct,
+  getOneProduct,
+  getRecomendedProducts,
+  updateProduct,
+  updateProductImage,
+} from "../controllers/product.controller";
 
-const route = new Hono()
+const route = new Hono();
 
-route.get('/', getAllProduct)
-route.get('/:id', getOneProduct)
-route.post('/', verifyToken, verifyAdmin, validateBody(AddProductSchema), createProduct)
-route.delete('/:id', verifyToken, verifyAdmin, deleteProduct)
+route.get("/", getAllProduct);
+route.get("/recommended/:id", getRecomendedProducts);
+route.get("/:id", getOneProduct);
+route.post(
+  "/",
+  verifyToken,
+  verifyAdmin,
+  validateBody(AddProductSchema),
+  createProduct,
+);
+route.put("/:id", verifyToken, verifyAdmin, validateBody(UpdateProductSchema), updateProduct);
+route.delete("/:id", verifyToken, verifyAdmin, deleteProduct);
+route.post('/:id/image', verifyToken, verifyAdmin, validateBody(emptyBodySchema), addProductImage);
+route.post('/:id/image/:imageId', verifyToken, verifyAdmin, validateBody(emptyBodySchema), updateProductImage);
+route.delete("/:id/image/:imageId", verifyToken, verifyAdmin, deleteProductImage);
 
-export const productRoute = route
+export const productRoute = route;

@@ -3,34 +3,34 @@ import z from "zod";
 import { formatZodErrors } from "../utils";
 
 export const validateBody = <T extends z.ZodTypeAny>(
-  schema: T
+  schema: T,
 ): MiddlewareHandler => {
   return async (c, next) => {
     const ct = c.req.header("Content-Type") || "";
     let raw: any = {};
 
     try {
-      if (ct.includes('application/json')) {
+      if (ct.includes("application/json")) {
         raw = await c.req.json();
-      } else if(ct.includes('multipart/form-data')){
-        const form = await c.req.parseBody({all: true})
-        raw = {}
+      } else if (ct.includes("multipart/form-data")) {
+        const form = await c.req.parseBody({ all: true });
+        raw = {};
 
         for (const key in form) {
-          if(form[key] instanceof File) continue
-          raw[key] = form[key]          
+          if (form[key] instanceof File) continue;
+          raw[key] = form[key];
         }
-        c.set('files', form)
+        c.set("files", form);
       } else {
         return c.json(
           {
             success: false,
-            message: "Unsupported Media Type: use application/json or multipart/form-data",
+            message:
+              "Unsupported Media Type: use application/json or multipart/form-data",
           },
-          415
+          415,
         );
       }
-
     } catch {
       return c.json({ success: false, message: "Invalid JSON payload" }, 400);
     }
@@ -43,11 +43,11 @@ export const validateBody = <T extends z.ZodTypeAny>(
           message: "Validation Failed!",
           errors: formatZodErrors(parsed.error),
         },
-        422
+        422,
       );
     }
 
-    c.set('validatedBody', parsed.data)
-    await next()
+    c.set("validatedBody", parsed.data);
+    await next();
   };
 };

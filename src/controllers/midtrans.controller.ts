@@ -6,6 +6,7 @@ import {
   PaymentStatus,
 } from "../../prisma/generated/prisma/enums";
 
+// TODO: add validation for midtrans webhook payload
 export const midtransWebhook = async (c: Context) => {
   try {
     const { order_id, transaction_status } = c.get(
