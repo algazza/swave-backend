@@ -7,14 +7,53 @@ export const getAllCart = async (c: Context) => {
     const userId = c.get("userId");
     const cart = await prisma.carts.findMany({
       where: { user_id: userId },
-      omit: {
-        user_id: true,
+      select: {
+        id: true,
+        quantity: true,
+        price: true,
+        product: {
+          select: {
+            id: true,
+            name: true,
+            category: {
+              select: {
+                category: true
+              }
+            },
+            product_images: {
+              take: 1,
+              select: {
+                image_path: true,
+              },
+            },
+          },
+        },
+        variant: {
+          select: {
+            id: true,
+            variant: true,
+            price: true,
+            stock: true,
+          },
+        },
       },
     });
 
+    const cartJson = cart.map((item) => ({
+      id: item.id,
+      quantity: item.quantity,
+      price: item.price,
+      product: {
+        id: item.product.id,
+        name: item.product.name,
+        product_images: item.product.product_images.map((img) => img.image_path)[0],
+        category: item.product.category.category,
+      },
+      variant: item.variant,
+    }));
     return c.json({
       success: true,
-      data: cart,
+      data: cartJson,
     });
   } catch (err) {
     return c.json(
@@ -25,16 +64,41 @@ export const getAllCart = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };
+
+export const getCountCart = async (c: Context) => {
+  try {
+    const userId = c.get("userId");
+    const count = await prisma.carts.count({
+      where: { user_id: userId },
+    });
+
+    return c.json({
+      success: true,
+      data: count,
+    });
+  } catch (err) {
+    return c.json(
+      {
+        success: false,
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
+      },
+      500,
+    );
+  }
+}
 
 export const addCart = async (c: Context) => {
   try {
     const userId = c.get("userId");
     const { quantity, variant_id, product_id } = c.get(
-      "validatedBody"
+      "validatedBody",
     ) as AddCartRequest;
 
     const product = await prisma.products.findUnique({
@@ -140,7 +204,7 @@ export const addCart = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };
@@ -195,7 +259,7 @@ export const updateCart = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };
@@ -232,7 +296,7 @@ export const deleteCart = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };
