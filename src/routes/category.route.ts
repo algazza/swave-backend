@@ -27,6 +27,7 @@ route.put(
   validateBody(categorySchema),
   updateCategory
 );
+route.delete('/:category/delete', verifyToken, verifyAdmin, deleteCategory);
 route.delete("/:category", verifyToken, verifyAdmin, deleteCategory);
 
 export const categoryRoute = route;

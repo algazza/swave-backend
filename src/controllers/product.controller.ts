@@ -15,6 +15,7 @@ export const getAllProduct = async (c: Context) => {
         id: true,
         name: true,
         sold: true,
+        slug: true,
         category: {
           select: {
             category: true,
@@ -47,9 +48,7 @@ export const getAllProduct = async (c: Context) => {
       name: p.name,
       sold: p.sold,
       category: p.category.category,
-      product_images: p.product_images.map(
-        (img) => img.image_path,
-      )[0],
+      product_images: p.product_images.map((img) => img.image_path)[0],
       price: p.variant.map((v) => v.price)[0],
       star:
         p.review.length === 0
@@ -89,6 +88,7 @@ export const getRecomendedProducts = async (c: Context) => {
         id: true,
         name: true,
         sold: true,
+        slug: true,
         category: {
           select: {
             category: true,
@@ -162,6 +162,7 @@ export const getOneProduct = async (c: Context) => {
       select: {
         id: true,
         name: true,
+        slug: true,
         description: true,
         sold: true,
         category: true,
@@ -256,7 +257,7 @@ export const createProduct = async (c: Context) => {
     if (existing) {
       return c.json({
         success: false,
-        message: "Product has regist",
+        message: "Product has registered",
       });
     }
 
@@ -285,10 +286,12 @@ export const createProduct = async (c: Context) => {
       imagePaths.push(`images/${folderName}/${fileName}`);
     }
 
+    const slugName = slugify(name);
     await prisma.products.create({
       data: {
         name,
         description,
+        slug: slugName,
         sold: 0,
 
         category: {
@@ -350,9 +353,16 @@ export const updateProduct = async (c: Context) => {
       if (existing) {
         return c.json({
           success: false,
-          message: "Product has regist",
+          message: "Product has registered",
         });
       }
+
+      await prisma.products.update({
+        where: { id: Number(productId) },
+        data: {
+          slug: slugify(name),
+        },
+      });
     }
 
     if (category) {
@@ -367,6 +377,7 @@ export const updateProduct = async (c: Context) => {
           message: "category not found",
         });
       }
+      
       await prisma.products.update({
         where: { id: Number(productId) },
         data: {
@@ -451,6 +462,50 @@ export const deleteProduct = async (c: Context) => {
       prisma.product_images.deleteMany({ where: { product_id: product.id } }),
       prisma.products.delete({ where: { id: product.id } }),
     ]);
+
+    return c.json({
+      success: true,
+      message: "Success delete product",
+    });
+  } catch (err) {
+    return c.json(
+      {
+        success: false,
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
+      },
+      500,
+    );
+  }
+};
+
+export const softDeleteProduct = async (c: Context) => {
+  try {
+    const productId = c.req.param("id");
+
+    const product = await prisma.products.findUnique({
+      where: { id: Number(productId) },
+    });
+
+    if (!product) {
+      return c.json(
+        {
+          success: false,
+          message: "Product not found",
+        },
+        404,
+      );
+    }
+
+    await prisma.products.update({
+      where: { id: Number(productId) },
+      data: {
+        is_active: false,
+        deleted_at: new Date(),
+      },
+    });
 
     return c.json({
       success: true,
@@ -594,13 +649,16 @@ export const updateProductImage = async (c: Context) => {
       message: "Success update product image",
     });
   } catch (err) {
-    return c.json({
-      success: false,
-      message:
-        err instanceof Error
-          ? err.message
-          : String(err) || "Internal server error",
-    });
+    return c.json(
+      {
+        success: false,
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
+      },
+      500,
+    );
   }
 };
 

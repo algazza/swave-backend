@@ -9,6 +9,7 @@ import {
   getAllProduct,
   getOneProduct,
   getRecomendedProducts,
+  softDeleteProduct,
   updateProduct,
   updateProductImage,
 } from "../controllers/product.controller";
@@ -26,7 +27,9 @@ route.post(
   createProduct,
 );
 route.put("/:id", verifyToken, verifyAdmin, validateBody(UpdateProductSchema), updateProduct);
+route.delete('/:id/delete', verifyToken, verifyAdmin, softDeleteProduct);
 route.delete("/:id", verifyToken, verifyAdmin, deleteProduct);
+
 route.post('/:id/image', verifyToken, verifyAdmin, validateBody(emptyBodySchema), addProductImage);
 route.post('/:id/image/:imageId', verifyToken, verifyAdmin, validateBody(emptyBodySchema), updateProductImage);
 route.delete("/:id/image/:imageId", verifyToken, verifyAdmin, deleteProductImage);

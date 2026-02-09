@@ -300,6 +300,50 @@ export const updateAddress = async (c: Context) => {
   }
 };
 
+export const softDeleteAddress = async (c: Context) => {
+  try {
+    const userId = c.get("userId");
+    const addressId = c.req.param("id");
+
+    const isAddress = await prisma.address.findFirst({
+      where: { id: Number(addressId), user_id: userId },
+    });
+
+    if (!isAddress) {
+      return c.json(
+        {
+          success: false,
+          message: "Address not found",
+        },
+        401
+      );
+    }
+    await prisma.address.update({
+      where: { id: Number(addressId) },
+      data: {
+        is_active: false,
+        deleted_at: new Date(),
+      },
+    });
+
+    return c.json({
+      success: true,
+      message: "success soft delete address",
+    });
+  } catch (err) {
+    return c.json(
+      {
+        success: false,
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
+      },
+      500
+    );
+  }
+};
+
 export const deleteAddress = async (c: Context) => {
   try {
     const userId = c.get("userId");

@@ -22,6 +22,7 @@ router.put(
   validateBody(updateAddressSchema),
   updateAddress
 );
+router.delete('/:id/delete', verifyToken, deleteAddress);
 router.delete("/:id", verifyToken, deleteAddress);
 
 export const AddressRoute = router;

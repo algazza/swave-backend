@@ -65,7 +65,7 @@ export const createContact = async (c: Context) => {
     const { name, email, topic, description } = c.get(
       "validatedBody"
     ) as AddContactRequest;
-    const contact = await prisma.contacts.create({
+    await prisma.contacts.create({
       data: {
         name,
         email,
@@ -76,7 +76,7 @@ export const createContact = async (c: Context) => {
 
     return c.json({
       success: true,
-      message: "Sucess add contact",
+      message: "Success add contact",
     });
   } catch (err) {
     return c.json(

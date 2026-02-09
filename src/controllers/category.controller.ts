@@ -152,6 +152,50 @@ export const updateCategory = async (c: Context) => {
   }
 };
 
+export const softDeleteCategory = async (c: Context) => {
+  try {
+    const categoryParam = c.req.param("category");
+
+    const isCategory = await prisma.categories.findFirst({
+      where: { category: categoryParam },
+    });
+
+    if (!isCategory) {
+      return c.json(
+        {
+          success: false,
+          message: "Category not found",
+        },
+        401,
+      );
+    }
+
+    await prisma.categories.update({
+      where: { category: categoryParam },
+      data: {
+        is_active: false,
+        deleted_at: new Date(),
+      },
+    });
+
+    return c.json({
+      success: true,
+      message: "success soft delete category",
+    });
+  } catch (err) {
+    return c.json(
+      {
+        success: false,
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
+      },
+      500,
+    );
+  }
+}
+
 export const deleteCategory = async (c: Context) => {
   try {
     const categoryParam = c.req.param("category");

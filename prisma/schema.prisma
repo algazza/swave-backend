@@ -48,12 +48,14 @@ enum OrderStatus {
 }
 
 model users {
-  id       Int    @id @default(autoincrement())
-  role     Role   @default(user)
-  name     String
-  username String @unique
-  phone    String
-  password String
+  id         Int      @id @default(autoincrement())
+  role       Role     @default(user)
+  name       String
+  username   String   @unique
+  phone      String
+  password   String
+  is_active  Boolean  @default(true)
+  deleted_at DateTime?
 
   address         address[]
   cart            carts[]
@@ -63,7 +65,7 @@ model users {
 }
 
 model address {
-  id           Int     @id @default(autoincrement())
+  id           Int       @id @default(autoincrement())
   recipient    String
   label        Label
   city         String
@@ -75,6 +77,8 @@ model address {
   longitude    String?
   latitude     String?
   description  String?
+  is_active    Boolean   @default(true)
+  deleted_at   DateTime?
 
   user     users        @relation(fields: [user_id], references: [id])
   delivery deliveries[]
@@ -82,11 +86,14 @@ model address {
 
 model products {
   id            Int      @id @default(autoincrement())
-  name          String
+  name          String   @unique
   description   String
   sold          Int
   categories_id Int
   created_at    DateTime @default(now())
+  slug          String   @unique
+  is_active     Boolean  @default(true)
+  deleted_at    DateTime?
 
   category         categories          @relation(fields: [categories_id], references: [id])
   variant          variants[]
@@ -106,8 +113,10 @@ model product_images {
 }
 
 model categories {
-  id       Int    @id @default(autoincrement())
-  category String @unique
+  id         Int      @id @default(autoincrement())
+  category   String   @unique
+  is_active  Boolean  @default(true)
+  deleted_at DateTime?
 
   product products[]
 }
@@ -118,6 +127,8 @@ model variants {
   price         Int
   stock         Int
   product_id    Int
+  is_active     Boolean  @default(true)
+  deleted_at    DateTime?
 
   product          products           @relation(fields: [product_id], references: [id])
   cart             carts[]

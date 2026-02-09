@@ -158,6 +158,52 @@ export const updateUser = async (c: Context) => {
   }
 };
 
+export const softDeleteUser = async (c: Context) => {
+  try {
+    const userId = c.req.param("id");
+
+    const user = await prisma.users.findUnique({
+      where: { id: Number(userId) },
+    });
+    if (!user) {
+      return c.json(
+        {
+          success: false,
+          message: "User not found",
+        },
+        401
+      );
+    }
+
+    await prisma.users.update({
+      where: { id: Number(userId) },
+      data: {
+        is_active: false,
+        deleted_at: new Date(),
+      },
+    });
+
+    return c.json(
+      {
+        success: true,
+        message: "success soft delete user",
+      },
+      200   
+    );
+  } catch (err) {
+    return c.json(
+      {
+        success: false,
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
+      },
+      500
+    );
+  }
+}
+
 export const deleteUser = async (c: Context) => {
   try {
     const userId = c.req.param("id");
