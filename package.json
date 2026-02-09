@@ -1,15 +1,21 @@
 {
   "name": "swave-backend",
   "scripts": {
-    "dev": "bun run --hot src/index.ts"
+    "dev": "bun run --hot src/index.ts",
+    "build": "bun build src/index.ts",
+    "lint": "bunx biome lint src/"
   },
   "dependencies": {
     "@faker-js/faker": "^10.1.0",
+    "@prisma/client": "6.18.0",
+    "@types/midtrans-client": "^1.4.0",
     "hono": "^4.10.6",
+    "midtrans-client": "^1.4.3",
+    "tinify": "^1.8.2",
     "zod": "^4.1.12"
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "prisma": "^7.0.0"
+    "prisma": "6.18.0"
   }
 }

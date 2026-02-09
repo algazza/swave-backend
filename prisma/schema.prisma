@@ -6,11 +6,12 @@
 
 generator client {
   provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  output   = "./generated/prisma"
 }
 
 datasource db {
   provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 enum Role {
@@ -19,11 +20,10 @@ enum Role {
 }
 
 enum Label {
-  rumah
-  kantor
-  kos
-  sekolah
-  apartemen
+  Home
+  Office
+  School
+  Apartment
 }
 
 enum Delivery {
@@ -31,28 +31,41 @@ enum Delivery {
   pickup
 }
 
-enum Status {
+enum PaymentStatus {
   pending
+  paid
+  expired
+  failed
+  refunded
+}
+
+enum OrderStatus {
+  pending
+  processing
   delivery
-  cancel
   success
+  cancelled
 }
 
 model users {
-  id       Int    @id @default(autoincrement())
-  role     Role   @default(user)
-  name     String
-  username String @unique
-  Phone    String
-  password String
+  id         Int      @id @default(autoincrement())
+  role       Role     @default(user)
+  name       String
+  username   String   @unique
+  phone      String
+  password   String
+  is_active  Boolean  @default(true)
+  deleted_at DateTime?
 
-  address  address[]
-  cart     carts[]
-  checkout checkouts[]
+  address         address[]
+  cart            carts[]
+  checkout        checkouts[]
+  review          reviews[]
+  insight_product insight_products[]
 }
 
 model address {
-  id           Int     @id @default(autoincrement())
+  id           Int       @id @default(autoincrement())
   recipient    String
   label        Label
   city         String
@@ -61,6 +74,11 @@ model address {
   address      String
   main_address Boolean
   user_id      Int
+  longitude    String?
+  latitude     String?
+  description  String?
+  is_active    Boolean   @default(true)
+  deleted_at   DateTime?
 
   user     users        @relation(fields: [user_id], references: [id])
   delivery deliveries[]
@@ -68,42 +86,51 @@ model address {
 
 model products {
   id            Int      @id @default(autoincrement())
-  name          String
+  name          String   @unique
   description   String
   sold          Int
   categories_id Int
   created_at    DateTime @default(now())
+  slug          String   @unique
+  is_active     Boolean  @default(true)
+  deleted_at    DateTime?
 
   category         categories          @relation(fields: [categories_id], references: [id])
+  variant          variants[]
   product_images   product_images[]
   cart             carts[]
   product_checkout product_checkouts[]
+  review           reviews[]
+  insight_product  insight_products[]
 }
 
 model product_images {
-  id         Int    @id @default(autoincrement())
-  image_path String
-  produt_id  Int
+  id          Int    @id @default(autoincrement())
+  image_path  String
+  product_id  Int
 
-  product products @relation(fields: [produt_id], references: [id])
+  product products @relation(fields: [product_id], references: [id])
 }
 
 model categories {
-  id       Int    @id @default(autoincrement())
-  category String
+  id         Int      @id @default(autoincrement())
+  category   String   @unique
+  is_active  Boolean  @default(true)
+  deleted_at DateTime?
 
   product products[]
-  variant variants[]
 }
 
 model variants {
   id            Int    @id @default(autoincrement())
-  variant       String
+  variant       String 
   price         Int
-  Stock         Int
-  categories_id Int
+  stock         Int
+  product_id    Int
+  is_active     Boolean  @default(true)
+  deleted_at    DateTime?
 
-  category         categories          @relation(fields: [categories_id], references: [id])
+  product          products           @relation(fields: [product_id], references: [id])
   cart             carts[]
   product_checkout product_checkouts[]
 }
@@ -129,8 +156,9 @@ model product_checkouts {
   variant_id  Int
   checkout_id Int
 
-  product products @relation(fields: [product_id], references: [id])
-  variant variants @relation(fields: [variant_id], references: [id])
+  product  products  @relation(fields: [product_id], references: [id])
+  variant  variants  @relation(fields: [variant_id], references: [id])
+  checkout checkouts @relation(fields: [checkout_id], references: [id])
 }
 
 model deliveries {
@@ -147,7 +175,7 @@ model deliveries {
 
 model checkouts {
   id               Int      @id @default(autoincrement())
-  order_id         Int      @unique
+  order_id         String   @unique
   total_price      Int
   estimation       String
   description      String?
@@ -155,20 +183,54 @@ model checkouts {
   gift_description String?
   snap_token       String?
   user_id          Int
-  delevery_id      Int @unique
+  delevery_id      Int      @unique
   created_at       DateTime @default(now())
 
-  user     users      @relation(fields: [user_id], references: [id])
-  delivery deliveries @relation(fields: [delevery_id], references: [id])
-  status status[]
+  user             users      @relation(fields: [user_id], references: [id])
+  delivery         deliveries @relation(fields: [delevery_id], references: [id])
+  status           status[]
+  product_checkout product_checkouts[]
+  review           reviews[]
 }
 
 model status {
-  id Int @id @default(autoincrement())
-  status_type Status
-  description String?
-  checkout_id Int
-  created_at DateTime @default(now())
+  id             Int             @id @default(autoincrement())
+  payment_status PaymentStatus?
+  order_status   OrderStatus
+  description    String?
+  checkout_id    Int
+  created_at     DateTime        @default(now())
 
-  chcekout checkouts @relation(fields: [checkout_id], references: [id])
+  checkout       checkouts       @relation(fields: [checkout_id], references: [id])
+}
+
+model reviews {
+  id          Int      @id @default(autoincrement())
+  star        Int 
+  description String
+  product_id  Int
+  user_id     Int
+  checkout_id Int      
+  created_at  DateTime @default(now())
+
+  product  products   @relation(fields: [product_id], references: [id])
+  user     users      @relation(fields: [user_id], references: [id])
+  checkout checkouts  @relation(fields: [checkout_id], references: [id])
+}
+
+model insight_products {
+  id          Int @id @default(autoincrement())
+  user_id     Int
+  product_id  Int
+
+  product  products   @relation(fields: [product_id], references: [id])
+  user     users      @relation(fields: [user_id], references: [id])
+}
+
+model contacts {
+  id            Int @id @default(autoincrement())
+  name          String
+  email         String
+  topic         String
+  description   String
 }
