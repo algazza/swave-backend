@@ -54,7 +54,7 @@ export const getAllCheckout = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };
@@ -137,7 +137,7 @@ export const getHistoryCheckout = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };
@@ -184,7 +184,7 @@ export const getOneCheckoutAdmin = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };
@@ -198,10 +198,27 @@ export const getOneCheckoutUser = async (c: Context) => {
       include: {
         delivery: {
           include: {
-            address: true,
+            address: {
+              omit: {
+                id: true,
+                user_id: true,
+                latitude: true,
+                longitude: true,
+              },
+            },
+          },
+          omit: {
+            id: true,
+            address_id: true,
           },
         },
-        status: true,
+        status: {
+          omit: {
+            id: true,
+            checkout_id: true,
+            payment_status: true,
+          },
+        },
         product_checkout: {
           select: {
             quantity: true,
@@ -234,6 +251,7 @@ export const getOneCheckoutUser = async (c: Context) => {
         user_id: true,
         snap_token: true,
         id: true,
+        delevery_id: true,
       },
     });
 
@@ -271,7 +289,7 @@ export const getOneCheckoutUser = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };
@@ -322,7 +340,7 @@ export const createCheckout = async (c: Context) => {
       adminAddress.longitude,
       adminAddress.latitude,
       address.longitude,
-      address.latitude
+      address.latitude,
     );
 
     const distanceRound = Math.round(res / 1000) * 1000;
@@ -394,12 +412,12 @@ export const createCheckout = async (c: Context) => {
             price: variant.price,
             subtotal: variant.price * p.quantity,
           };
-        })
+        }),
       );
 
       const total_price =
         variantItems.reduce((acc, item) => acc + item.subtotal, 0) +
-        distanceRound * 2;
+        distanceRound * 1.5;
 
       const order_id = `ORD-${Date.now()}${Math.floor(Math.random() * 1000)}`;
 
@@ -422,7 +440,7 @@ export const createCheckout = async (c: Context) => {
               delivery_type: delivery.delivery_type,
               pickup_date: delivery.pickup_date,
               pickup_hour: delivery.pickup_hour,
-              delivery_price: 0,
+              delivery_price: distanceRound * 1.5,
               address: {
                 connect: {
                   id: delivery.address_id,
@@ -492,7 +510,7 @@ export const createCheckout = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };
@@ -502,7 +520,19 @@ export const createStatusCheckout = async (c: Context) => {
     const orderId = c.req.param("orderId");
     const checkout = await prisma.checkouts.findUnique({
       where: { order_id: orderId },
-      select: { id: true, product_checkout: true },
+      select: {
+        id: true,
+        product_checkout: true,
+        status: {
+          orderBy: {
+            created_at: "desc",
+          },
+          take: 1,
+          select: {
+            order_status: true,
+          },
+        },
+      },
     });
 
     if (!checkout) {
@@ -512,49 +542,85 @@ export const createStatusCheckout = async (c: Context) => {
       });
     }
 
-    const { order_status, description, created_at } = c.get(
-      "validatedBody"
+    const { order_status, description } = c.get(
+      "validatedBody",
     ) as UpdateStatusRequest;
 
-    await prisma.status.create({
-      data: {
-        order_status,
-        description,
-        created_at,
-        checkout: {
-          connect: {
-            id: checkout.id,
+    const statusFlow = [
+      "pending",
+      "processing",
+      "delivery",
+      "success",
+    ] as const;
+    const latestStatus = checkout.status[0]?.order_status ?? "pending";
+
+    if (order_status !== "cancelled") {
+      const currentIndex = statusFlow.indexOf(
+        latestStatus as (typeof statusFlow)[number],
+      );
+      const nextIndex = statusFlow.indexOf(
+        order_status as (typeof statusFlow)[number],
+      );
+
+      if (
+        currentIndex === -1 ||
+        nextIndex === -1 ||
+        nextIndex !== currentIndex + 1
+      ) {
+        return c.json(
+          {
+            success: false,
+            message:
+              "Status must follow sequence: pending -> processing -> delivery -> success",
+          },
+          400,
+        );
+      }
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.status.create({
+        data: {
+          order_status,
+          description,
+          checkout: {
+            connect: {
+              id: checkout.id,
+            },
           },
         },
-      },
-    });
-    if (order_status === "cancelled") {
-      checkout.product_checkout.map(async (p) => {
-        await prisma.products.update({
-          where: { id: p.product_id },
-          data: {
-            sold: {
-              decrement: p.quantity,
-            },
-            variant: {
-              update: {
-                where: { id: p.variant_id },
-                data: {
-                  stock: {
-                    increment: p.quantity,
+      });
+  
+      if (order_status === "cancelled") {
+        await Promise.all(
+          checkout.product_checkout.map((p) =>
+            tx.products.update({
+              where: { id: p.product_id },
+              data: {
+                sold: {
+                  decrement: p.quantity,
+                },
+                variant: {
+                  update: {
+                    where: { id: p.variant_id },
+                    data: {
+                      stock: {
+                        increment: p.quantity,
+                      },
+                    },
                   },
                 },
               },
-            },
-          },
+            }),
+          ),
+        );
+  
+        return c.json({
+          success: true,
+          message: "Success add cancel status",
         });
-      });
-
-      return c.json({
-        success: true,
-        message: "Success add cancel status",
-      });
-    }
+      }
+    })
 
     return c.json({
       success: true,
@@ -569,7 +635,7 @@ export const createStatusCheckout = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };
