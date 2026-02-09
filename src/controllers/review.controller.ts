@@ -296,3 +296,40 @@ export const createReview = async (c: Context) => {
     );
   }
 };
+
+export const deleteReview = async (c: Context) => {
+  try {
+    const reviewId = c.req.param("id");
+
+    const review = await prisma.reviews.findFirst({
+      where: { id: Number(reviewId) },
+    });
+
+    if (!review) {
+      return c.json({
+        success: false,
+        message: "review not found",
+      });
+    }
+
+    await prisma.reviews.delete({
+      where: { id: Number(reviewId) },
+    });
+
+    return c.json({
+      success: true,
+      message: "success delete review",
+    });
+  } catch (err) {
+    return c.json(
+      {
+        success: false,
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
+      },
+      500,
+    );
+  }
+}
