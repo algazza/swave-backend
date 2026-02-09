@@ -156,9 +156,9 @@ export const getRecomendedProducts = async (c: Context) => {
 
 export const getOneProduct = async (c: Context) => {
   try {
-    const id = c.req.param("id");
+    const slug = c.req.param("slug");
     const product = await prisma.products.findUnique({
-      where: { id: Number(id) },
+      where: { slug: String(slug) },
       select: {
         id: true,
         name: true,

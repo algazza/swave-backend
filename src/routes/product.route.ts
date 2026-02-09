@@ -18,7 +18,7 @@ const route = new Hono();
 
 route.get("/", getAllProduct);
 route.get("/recommended/:id", getRecomendedProducts);
-route.get("/:id", getOneProduct);
+route.get("/:slug", getOneProduct);
 route.post(
   "/",
   verifyToken,
