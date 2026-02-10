@@ -17,7 +17,7 @@ import {
 const route = new Hono();
 
 route.get("/", getAllProduct);
-route.get("/recommended/:id", getRecomendedProducts);
+route.get("/recommended/:slug", getRecomendedProducts);
 route.get("/:slug", getOneProduct);
 route.post(
   "/",

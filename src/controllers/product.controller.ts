@@ -76,12 +76,12 @@ export const getAllProduct = async (c: Context) => {
 
 export const getRecomendedProducts = async (c: Context) => {
   try {
-    const productId = Number(c.req.param("id"));
+    const productSlug = c.req.param("slug");
 
     const products = await prisma.products.findMany({
       where: {
         NOT: {
-          id: productId,
+          slug: String(productSlug),
         },
       },
       select: {
