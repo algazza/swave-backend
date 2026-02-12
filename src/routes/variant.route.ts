@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { validateBody, verifyAdmin, verifyToken } from "../middlewares";
 import {
-  addVariantSchema,
+  AddVariantArraySchema,
   updateVariantSchema,
 } from "../schemas/variant.schema";
 import {
@@ -19,7 +19,7 @@ route.post(
   "/:productId",
   verifyToken,
   verifyAdmin,
-  validateBody(addVariantSchema),
+  validateBody(AddVariantArraySchema),
   createVariant,
 );
 route.put(

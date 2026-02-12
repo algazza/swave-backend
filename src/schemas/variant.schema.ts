@@ -6,6 +6,10 @@ export const addVariantSchema = z.object({
     stock: z.number()
 })
 
+export const AddVariantArraySchema = z.object({
+    variants: z.array(addVariantSchema)
+})
+
 export const updateVariantSchema = z.object({
     variant: z.string().optional(),
     price: z.number().optional(),

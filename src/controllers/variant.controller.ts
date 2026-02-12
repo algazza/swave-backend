@@ -17,7 +17,7 @@ export const getVariantByCategory = async (c: Context) => {
           success: false,
           message: "Product not found",
         },
-        401
+        404,
       );
     }
     return c.json({
@@ -33,7 +33,7 @@ export const getVariantByCategory = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };
@@ -52,41 +52,40 @@ export const createVariant = async (c: Context) => {
           success: false,
           message: "Product not found",
         },
-        401
+        404,
       );
     }
 
-    const { variant, price, stock } = c.get(
-      "validatedBody"
-    ) as AddVariantRequest;
+    const { variants } = c.get("validatedBody") as {
+      variants: AddVariantRequest[];
+    };
 
-    const existing = await prisma.variants.findFirst({
-      where: { variant, product_id: Number(productId) },
+    const variantName = variants.map((v) => v.variant);
+
+    const existing = await prisma.variants.findMany({
+      where: { product_id: Number(productId), variant: { in: variantName } },
     });
 
-    if (existing) {
+    if (existing.length > 0) {
       return c.json(
         {
           success: false,
           message: "variant has been registered",
         },
-        409
+        409,
       );
     }
 
-    await prisma.variants.create({
-      data: {
-        variant,
-        price,
-        stock,
-
-        product: {
-          connect: {
-            id: Number(productId),
-          },
-        },
-      },
-    });
+    await prisma.$transaction(
+      variants.map(v=> prisma.variants.create({
+        data: {
+          variant: v.variant,
+          price: v.price,
+          stock: v.stock,
+          product_id: Number(productId),
+        }
+      }))
+    )
 
     return c.json({
       success: true,
@@ -101,7 +100,7 @@ export const createVariant = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };
@@ -121,7 +120,7 @@ export const updateVariant = async (c: Context) => {
           success: false,
           message: "Product not found",
         },
-        401
+        404,
       );
     }
 
@@ -136,12 +135,12 @@ export const updateVariant = async (c: Context) => {
           success: false,
           message: "Variant not found",
         },
-        401
+        404,
       );
     }
 
     const { variant, price, stock } = c.get(
-      "validatedBody"
+      "validatedBody",
     ) as UpdateVariantRequest;
 
     const existing = await prisma.variants.findFirst({
@@ -154,7 +153,7 @@ export const updateVariant = async (c: Context) => {
           success: false,
           message: "variant has been registered",
         },
-        409
+        409,
       );
     }
 
@@ -180,7 +179,7 @@ export const updateVariant = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };
@@ -200,7 +199,7 @@ export const softDeleteVariant = async (c: Context) => {
           success: false,
           message: "Product not found",
         },
-        401
+        404,
       );
     }
 
@@ -215,7 +214,7 @@ export const softDeleteVariant = async (c: Context) => {
           success: false,
           message: "Variant not found",
         },
-        401
+        404,
       );
     }
 
@@ -240,10 +239,10 @@ export const softDeleteVariant = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
-}
+};
 
 export const deleteVaraint = async (c: Context) => {
   try {
@@ -260,7 +259,7 @@ export const deleteVaraint = async (c: Context) => {
           success: false,
           message: "Product not found",
         },
-        401
+        404,
       );
     }
 
@@ -275,7 +274,7 @@ export const deleteVaraint = async (c: Context) => {
           success: false,
           message: "Variant not found",
         },
-        401
+        404,
       );
     }
 
@@ -296,7 +295,7 @@ export const deleteVaraint = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };
