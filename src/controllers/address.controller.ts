@@ -25,7 +25,7 @@ export const getAllAddress = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };
@@ -46,7 +46,7 @@ export const getOneAddress = async (c: Context) => {
           success: false,
           message: "No address found",
         },
-        404
+        404,
       );
     }
 
@@ -63,7 +63,7 @@ export const getOneAddress = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };
@@ -106,7 +106,7 @@ export const getDistance = async (c: Context) => {
       adminAddress.longitude,
       adminAddress.latitude,
       userAddress.longitude,
-      userAddress.latitude
+      userAddress.latitude,
     );
 
     const distanceRound = Math.round(res / 1000) * 1000;
@@ -127,7 +127,7 @@ export const getDistance = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };
@@ -195,7 +195,7 @@ export const createAddress = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };
@@ -221,7 +221,7 @@ export const updateAddress = async (c: Context) => {
           success: false,
           message: "Address not found",
         },
-        401
+        404,
       );
     }
 
@@ -256,7 +256,7 @@ export const updateAddress = async (c: Context) => {
       const res = await fowardLocation(
         address || isAddress.address,
         city || isAddress.city,
-        zip_code || String(isAddress.zip_code)
+        zip_code || String(isAddress.zip_code),
       );
 
       await prisma.address.update({
@@ -295,7 +295,7 @@ export const updateAddress = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };
@@ -315,7 +315,7 @@ export const softDeleteAddress = async (c: Context) => {
           success: false,
           message: "Address not found",
         },
-        401
+        404,
       );
     }
     await prisma.address.update({
@@ -339,7 +339,7 @@ export const softDeleteAddress = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };
@@ -359,7 +359,7 @@ export const deleteAddress = async (c: Context) => {
           success: false,
           message: "Address not found",
         },
-        401
+        404,
       );
     }
     await prisma.address.delete({
@@ -379,7 +379,7 @@ export const deleteAddress = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };

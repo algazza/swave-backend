@@ -6,7 +6,7 @@ import prisma from "../../prisma/client";
 export const signup = async (c: Context) => {
   try {
     const { name, username, phone, password } = c.get(
-      "validatedBody"
+      "validatedBody",
     ) as RegisterRequest;
 
     const existing = await prisma.users.findFirst({
@@ -19,8 +19,8 @@ export const signup = async (c: Context) => {
         existing.username === username
           ? "username"
           : existing.phone === phone
-          ? "phone"
-          : "username";
+            ? "phone"
+            : "username";
       return c.json(
         {
           success: false,
@@ -30,7 +30,7 @@ export const signup = async (c: Context) => {
               : "Phone has been registered",
           errors: { [conflictField]: "already in used" },
         },
-        409
+        409,
       );
     }
 
@@ -67,7 +67,7 @@ export const signup = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };
@@ -84,7 +84,7 @@ export const signin = async (c: Context) => {
           success: false,
           message: "User not found",
         },
-        401
+        404,
       );
     }
 
@@ -97,7 +97,7 @@ export const signin = async (c: Context) => {
           success: false,
           message: "incorrect password",
         },
-        401
+        409,
       );
     }
 
@@ -122,7 +122,7 @@ export const signin = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };

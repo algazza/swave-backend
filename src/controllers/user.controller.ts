@@ -17,7 +17,7 @@ export const getAllUser = async (c: Context) => {
         success: true,
         data: users,
       },
-      200
+      200,
     );
   } catch (err) {
     return c.json(
@@ -28,7 +28,7 @@ export const getAllUser = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };
@@ -57,7 +57,7 @@ export const getOneUser = async (c: Context) => {
           success: false,
           message: "User not found",
         },
-        401
+        404,
       );
     }
 
@@ -66,7 +66,7 @@ export const getOneUser = async (c: Context) => {
         success: true,
         data: user,
       },
-      200
+      200,
     );
   } catch (err) {
     return c.json(
@@ -77,7 +77,7 @@ export const getOneUser = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };
@@ -95,12 +95,12 @@ export const updateUser = async (c: Context) => {
           success: false,
           message: "User not found",
         },
-        401
+        404,
       );
     }
 
     const { name, username, phone, password } = c.get(
-      "validatedBody"
+      "validatedBody",
     ) as UpdateUserRequest;
 
     const existing = await prisma.users.findFirst({
@@ -113,8 +113,8 @@ export const updateUser = async (c: Context) => {
         existing.username === username
           ? "username"
           : existing.phone === phone
-          ? "phone"
-          : "username";
+            ? "phone"
+            : "username";
       return c.json(
         {
           success: false,
@@ -124,7 +124,7 @@ export const updateUser = async (c: Context) => {
               : "Phone has been registered",
           errors: { [conflictField]: "already in used" },
         },
-        409
+        409,
       );
     }
     await prisma.users.update({
@@ -142,7 +142,7 @@ export const updateUser = async (c: Context) => {
         success: true,
         message: "success edit profile",
       },
-      200
+      200,
     );
   } catch (err) {
     return c.json(
@@ -153,7 +153,7 @@ export const updateUser = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };
@@ -171,7 +171,7 @@ export const softDeleteUser = async (c: Context) => {
           success: false,
           message: "User not found",
         },
-        401
+        404,
       );
     }
 
@@ -188,7 +188,7 @@ export const softDeleteUser = async (c: Context) => {
         success: true,
         message: "success soft delete user",
       },
-      200   
+      200,
     );
   } catch (err) {
     return c.json(
@@ -199,10 +199,10 @@ export const softDeleteUser = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
-}
+};
 
 export const deleteUser = async (c: Context) => {
   try {
@@ -217,7 +217,7 @@ export const deleteUser = async (c: Context) => {
           success: false,
           message: "User not found",
         },
-        401
+        404,
       );
     }
 
@@ -230,7 +230,7 @@ export const deleteUser = async (c: Context) => {
         success: true,
         message: "success delete user",
       },
-      200   
+      200,
     );
   } catch (err) {
     return c.json(
@@ -241,7 +241,7 @@ export const deleteUser = async (c: Context) => {
             ? err.message
             : String(err) || "Internal server error",
       },
-      500
+      500,
     );
   }
 };

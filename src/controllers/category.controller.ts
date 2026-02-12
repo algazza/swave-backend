@@ -16,7 +16,7 @@ export const getAllCategory = async (c: Context) => {
       .sort((a, b) =>
         a.category.localeCompare(b.category, "id", { sensitivity: "base" }),
       );
-      
+
     return c.json({
       success: true,
       data: categoryJson,
@@ -50,7 +50,7 @@ export const getOneCategory = async (c: Context) => {
           success: false,
           message: "Category not found",
         },
-        401,
+        404,
       );
     }
 
@@ -123,7 +123,7 @@ export const updateCategory = async (c: Context) => {
           success: false,
           message: "Category not found",
         },
-        401,
+        404,
       );
     }
 
@@ -166,7 +166,7 @@ export const softDeleteCategory = async (c: Context) => {
           success: false,
           message: "Category not found",
         },
-        401,
+        404,
       );
     }
 
@@ -194,7 +194,7 @@ export const softDeleteCategory = async (c: Context) => {
       500,
     );
   }
-}
+};
 
 export const deleteCategory = async (c: Context) => {
   try {
@@ -211,7 +211,7 @@ export const deleteCategory = async (c: Context) => {
           success: false,
           message: "Category not found",
         },
-        401,
+        404,
       );
     }
 
