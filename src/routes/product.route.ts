@@ -6,6 +6,7 @@ import {
   createProduct,
   deleteProduct,
   deleteProductImage,
+  getAllDeletedProduct,
   getAllProduct,
   getOneProduct,
   getRecomendedProducts,
@@ -19,6 +20,7 @@ const route = new Hono();
 route.get("/", getAllProduct);
 route.get("/recommended/:slug", getRecomendedProducts);
 route.get("/:slug", getOneProduct);
+route.get("/deleted", getAllDeletedProduct);
 route.post(
   "/",
   verifyToken,

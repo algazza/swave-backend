@@ -11,6 +11,7 @@ tinify.key = process.env.TINIFY_API_KEY || "";
 export const getAllProduct = async (c: Context) => {
   try {
     const products = await prisma.products.findMany({
+      where: { is_active: true },
       select: {
         id: true,
         name: true,
@@ -47,6 +48,7 @@ export const getAllProduct = async (c: Context) => {
       id: p.id,
       name: p.name,
       sold: p.sold,
+      slug: p.slug,
       category: p.category.category,
       product_images: p.product_images.map((img) => img.image_path)[0],
       price: p.variant.map((v) => v.price)[0],
@@ -83,6 +85,7 @@ export const getRecomendedProducts = async (c: Context) => {
         NOT: {
           slug: String(productSlug),
         },
+        is_active: true,
       },
       select: {
         id: true,
@@ -126,6 +129,7 @@ export const getRecomendedProducts = async (c: Context) => {
       id: p.id,
       name: p.name,
       sold: p.sold,
+      slug: p.slug,
       category: p.category.category,
       product_images: p.product_images.map((img) => img.image_path)[0],
       price: p.variant.map((v) => v.price)[0],
@@ -158,13 +162,14 @@ export const getOneProduct = async (c: Context) => {
   try {
     const slug = c.req.param("slug");
     const product = await prisma.products.findUnique({
-      where: { slug: String(slug) },
+      where: { slug: String(slug), is_active: true },
       select: {
         id: true,
         name: true,
         slug: true,
         description: true,
         sold: true,
+        is_active: true,
         category: true,
         variant: {
           omit: {
@@ -236,11 +241,79 @@ export const getOneProduct = async (c: Context) => {
   }
 };
 
+export const getAllDeletedProduct = async (c: Context) => {
+  try {
+    const products = await prisma.products.findMany({
+      where: { is_active: false },
+      select: {
+        id: true,
+        name: true,
+        sold: true,
+        slug: true,
+        category: {
+          select: {
+            category: true,
+          },
+        },
+        variant: {
+          select: {
+            price: true,
+          },
+        },
+        product_images: {
+          take: 1,
+          select: { image_path: true },
+        },
+        review: {
+          select: { star: true },
+        },
+      },
+    });
+
+    if (!products) {
+      return c.json({
+        success: false,
+        message: "product not added",
+      });
+    }
+
+    const productJson = products.map((p) => ({
+      id: p.id,
+      name: p.name,
+      sold: p.sold,
+      slug: p.slug,
+      category: p.category.category,
+      product_images: p.product_images.map((img) => img.image_path)[0],
+      price: p.variant.map((v) => v.price)[0],
+      star:
+        p.review.length === 0
+          ? 0
+          : p.review.reduce((acc, item) => acc + item.star, 0) /
+            p.review.length,
+    }));
+    return c.json({
+      success: true,
+      data: productJson,
+    });
+  } catch (err) {
+    return c.json(
+      {
+        success: false,
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
+      },
+      500,
+    );
+  }
+};
+
 export const createProduct = async (c: Context) => {
   try {
     const files = c.get("files");
     const images = files["images"];
-    const imagePaths = [];
+    const imagePaths: any[] = [];
 
     if (!images) {
       return c.json({ success: false, message: "images required" }, 400);
@@ -277,22 +350,26 @@ export const createProduct = async (c: Context) => {
     await mkdir(`images/${folderName}`, { recursive: true });
 
     const fileList = Array.isArray(images) ? images : [images];
-    for (const file of fileList) {
-      const buffer = Buffer.from(await file.arrayBuffer());
-      const compressed = await tinify.fromBuffer(buffer).toBuffer();
-      const fileName = slugifyFilename(file.name);
+    // TODO: change refactor image from tinyjpg to sharp
+    await Promise.all(
+      fileList.map(async (file) => {
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const compressed = await tinify.fromBuffer(buffer).toBuffer();
+        const fileName = slugifyFilename(file.name);
 
-      await Bun.write(`./images/${folderName}/${fileName}`, compressed);
-      imagePaths.push(`images/${folderName}/${fileName}`);
-    }
+        await Bun.write(`./images/${folderName}/${fileName}`, compressed);
+        imagePaths.push(`images/${folderName}/${fileName}`);
+      }),
+    );
 
     const slugName = slugify(name);
-    await prisma.products.create({
+    const product = await prisma.products.create({
       data: {
         name,
         description,
         slug: slugName,
         sold: 0,
+        is_active: false,
 
         category: {
           connect: {
@@ -310,7 +387,12 @@ export const createProduct = async (c: Context) => {
 
     return c.json({
       success: true,
-      message: "Success add product",
+      data: {
+        id: product.id,
+        slug: product.slug,
+        name: product.name,
+        product_images: imagePaths[0],
+      },
     });
   } catch (err) {
     return c.json(
@@ -377,7 +459,7 @@ export const updateProduct = async (c: Context) => {
           message: "category not found",
         });
       }
-      
+
       await prisma.products.update({
         where: { id: Number(productId) },
         data: {

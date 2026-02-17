@@ -77,15 +77,30 @@ export const createVariant = async (c: Context) => {
     }
 
     await prisma.$transaction(
-      variants.map(v=> prisma.variants.create({
+      variants.map((v) =>
+        prisma.variants.create({
+          data: {
+            variant: v.variant,
+            price: v.price,
+            stock: v.stock,
+            product: {
+              connect: {
+                id: Number(productId),
+              },
+            },
+          },
+        }),
+      ),
+    );
+
+    if (product.is_active === false) {
+      await prisma.products.update({
+        where: { id: Number(productId) },
         data: {
-          variant: v.variant,
-          price: v.price,
-          stock: v.stock,
-          product_id: Number(productId),
-        }
-      }))
-    )
+          is_active: true,
+        },
+      });
+    }
 
     return c.json({
       success: true,
