@@ -29,8 +29,8 @@ route.post(
   createProduct,
 );
 route.put("/:id", verifyToken, verifyAdmin, validateBody(UpdateProductSchema), updateProduct);
-route.delete('/:id/delete', verifyToken, verifyAdmin, softDeleteProduct);
-route.delete("/:id", verifyToken, verifyAdmin, deleteProduct);
+route.delete('/:id', verifyToken, verifyAdmin, softDeleteProduct);
+route.delete("/:id/delete", verifyToken, verifyAdmin, deleteProduct);
 
 route.post('/:id/image', verifyToken, verifyAdmin, validateBody(emptyBodySchema), addProductImage);
 route.post('/:id/image/:imageId', verifyToken, verifyAdmin, validateBody(emptyBodySchema), updateProductImage);

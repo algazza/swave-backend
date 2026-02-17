@@ -14,7 +14,7 @@ const router = new Hono();
 router.get("/", verifyToken, verifyAdmin, getAllUser);
 router.get("/me", verifyToken, getOneUser);
 router.put("/", verifyToken, validateBody(updateUserSchema), updateUser);
-router.delete("/:id/delete", verifyToken, verifyAdmin, softDeleteUser);
-router.delete("/:id", verifyToken, verifyAdmin, deleteUser);
+router.delete("/:id", verifyToken, verifyAdmin, softDeleteUser);
+router.delete("/:id/delete", verifyToken, verifyAdmin, deleteUser);
 
 export const userRoute = router;

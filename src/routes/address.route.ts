@@ -7,6 +7,7 @@ import {
   getAllAddress,
   getDistance,
   getOneAddress,
+  softDeleteAddress,
   updateAddress,
 } from "../controllers/address.controller";
 
@@ -22,7 +23,7 @@ router.put(
   validateBody(updateAddressSchema),
   updateAddress
 );
-router.delete('/:id/delete', verifyToken, deleteAddress);
-router.delete("/:id", verifyToken, deleteAddress);
+router.delete('/:id', verifyToken, softDeleteAddress);
+router.delete("/:id/delete", verifyToken, deleteAddress);
 
 export const AddressRoute = router;

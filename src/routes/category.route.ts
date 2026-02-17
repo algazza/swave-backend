@@ -6,6 +6,7 @@ import {
   deleteCategory,
   getAllCategory,
   getOneCategory,
+  softDeleteCategory,
   updateCategory,
 } from "../controllers/category.controller";
 
@@ -27,7 +28,7 @@ route.put(
   validateBody(categorySchema),
   updateCategory
 );
-route.delete('/:category/delete', verifyToken, verifyAdmin, deleteCategory);
-route.delete("/:category", verifyToken, verifyAdmin, deleteCategory);
+route.delete('/:category', verifyToken, verifyAdmin, softDeleteCategory);
+route.delete("/:category/delete", verifyToken, verifyAdmin, deleteCategory);
 
 export const categoryRoute = route;

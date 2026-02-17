@@ -30,11 +30,11 @@ route.put(
   updateVariant,
 );
 route.delete(
-  "/:productId/:variant/delete",
+  "/:productId/:variant",
   verifyToken,
   verifyAdmin,
   softDeleteVariant,
 );
-route.delete("/:productId/:variant", verifyToken, verifyAdmin, deleteVaraint);
+route.delete("/:productId/:variant/delete", verifyToken, verifyAdmin, deleteVaraint);
 
 export const variantRoute = route;
