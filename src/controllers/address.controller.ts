@@ -326,6 +326,7 @@ export const softDeleteAddress = async (c: Context) => {
     await prisma.address.update({
       where: { id: Number(addressId) },
       data: {
+        main_address: false,
         is_active: false,
         deleted_at: new Date(),
       },
