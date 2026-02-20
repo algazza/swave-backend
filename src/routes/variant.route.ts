@@ -7,14 +7,14 @@ import {
 import {
   createVariant,
   deleteVaraint,
-  getVariantByCategory,
+  getVariantByProduct,
   softDeleteVariant,
   updateVariant,
 } from "../controllers/variant.controller";
 
 const route = new Hono();
 
-route.get("/:productId", verifyToken, verifyAdmin, getVariantByCategory);
+route.get("/:productId", verifyToken, verifyAdmin, getVariantByProduct);
 route.post(
   "/:productId",
   verifyToken,

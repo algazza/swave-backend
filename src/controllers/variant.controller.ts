@@ -2,12 +2,12 @@ import { Context } from "hono";
 import prisma from "../../prisma/client";
 import { AddVariantRequest, UpdateVariantRequest } from "../types/variant";
 
-export const getVariantByCategory = async (c: Context) => {
+export const getVariantByProduct = async (c: Context) => {
   try {
     const productId = c.req.param("productId");
 
     const varaintData = await prisma.products.findUnique({
-      where: { id: Number(productId) },
+      where: { id: Number(productId), is_active: true },
       select: { id: true, name: true, variant: true },
     });
 

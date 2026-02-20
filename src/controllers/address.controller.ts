@@ -73,7 +73,7 @@ export const getDistance = async (c: Context) => {
     const userId = c.get("userId");
     const addressId = c.req.param("id");
     const adminAddress = await prisma.address.findFirst({
-      where: { user_id: 1 },
+      where: { user_id: 1, is_active: true, main_address: true },
       select: {
         latitude: true,
         longitude: true,
@@ -155,7 +155,7 @@ export const createAddress = async (c: Context) => {
     const res = await fowardLocation(address, city, zip_code);
 
     const isMainAddress = await prisma.address.findFirst({
-      where: { user_id: userId, main_address: true },
+      where: { user_id: userId, main_address: true, is_active: true },
       select: { id: true },
     });
 
@@ -211,7 +211,7 @@ export const updateAddress = async (c: Context) => {
     const addressId = c.req.param("id");
 
     const isAddress = await prisma.address.findFirst({
-      where: { id: Number(addressId), user_id: userId },
+      where: { id: Number(addressId), user_id: userId, is_active: true },
       select: {
         id: true,
         city: true,
@@ -242,7 +242,7 @@ export const updateAddress = async (c: Context) => {
     } = c.get("validatedBody") as UpdateAddressRequest;
 
     const isMainAddress = await prisma.address.findFirst({
-      where: { user_id: userId, main_address: true },
+      where: { user_id: userId, main_address: true, is_active: true },
       select: { id: true },
     });
 
@@ -311,7 +311,7 @@ export const softDeleteAddress = async (c: Context) => {
     const addressId = c.req.param("id");
 
     const isAddress = await prisma.address.findFirst({
-      where: { id: Number(addressId), user_id: userId },
+      where: { id: Number(addressId), user_id: userId, is_active: true },
     });
 
     if (!isAddress) {
