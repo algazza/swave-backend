@@ -38,10 +38,13 @@ export const getAllProduct = async (c: Context) => {
     });
 
     if (!products) {
-      return c.json({
-        success: false,
-        message: "product not added",
-      });
+      return c.json(
+        {
+          success: false,
+          message: "product not added",
+        },
+        404,
+      );
     }
 
     const productJson = products.map((p) => ({
@@ -271,10 +274,13 @@ export const getAllDeletedProduct = async (c: Context) => {
     });
 
     if (!products) {
-      return c.json({
-        success: false,
-        message: "product not added",
-      });
+      return c.json(
+        {
+          success: false,
+          message: "product not added",
+        },
+        404,
+      );
     }
 
     const productJson = products.map((p) => ({
@@ -328,10 +334,13 @@ export const createProduct = async (c: Context) => {
     });
 
     if (existing) {
-      return c.json({
-        success: false,
-        message: "Product has registered",
-      });
+      return c.json(
+        {
+          success: false,
+          message: "Product has registered",
+        },
+        409,
+      );
     }
 
     const categoryId = await prisma.categories.findUnique({
@@ -340,10 +349,13 @@ export const createProduct = async (c: Context) => {
     });
 
     if (!categoryId) {
-      return c.json({
-        success: "false",
-        message: "category not found",
-      });
+      return c.json(
+        {
+          success: false,
+          message: "category not found",
+        },
+        404,
+      );
     }
 
     const folderName = slugify(name);
@@ -417,10 +429,13 @@ export const updateProduct = async (c: Context) => {
     });
 
     if (!isProduct) {
-      return c.json({
-        success: false,
-        message: "Product not found",
-      });
+      return c.json(
+        {
+          success: false,
+          message: "Product not found",
+        },
+        404,
+      );
     }
 
     const { name, description, category } = c.get(
@@ -433,10 +448,13 @@ export const updateProduct = async (c: Context) => {
       });
 
       if (existing) {
-        return c.json({
-          success: false,
-          message: "Product has registered",
-        });
+        return c.json(
+          {
+            success: false,
+            message: "Product has registered",
+          },
+          409,
+        );
       }
 
       await prisma.products.update({
@@ -454,10 +472,13 @@ export const updateProduct = async (c: Context) => {
       });
 
       if (!categoryId) {
-        return c.json({
-          success: "false",
-          message: "category not found",
-        });
+        return c.json(
+          {
+            success: false,
+            message: "category not found",
+          },
+          404,
+        );
       }
 
       await prisma.products.update({
@@ -472,10 +493,6 @@ export const updateProduct = async (c: Context) => {
           },
         },
       });
-      return c.json({
-        success: true,
-        message: "Success update product",
-      });
     }
 
     await prisma.products.update({
@@ -488,7 +505,11 @@ export const updateProduct = async (c: Context) => {
 
     return c.json({
       success: true,
-      message: "Success update product",
+      data: {
+        id: isProduct.id,
+        slug: slugify(name || isProduct.name),
+        name: name || isProduct.name,
+      },
     });
   } catch (err) {
     return c.json(

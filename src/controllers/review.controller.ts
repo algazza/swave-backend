@@ -242,14 +242,14 @@ export const createReview = async (c: Context) => {
       return c.json({
         success: false,
         message: "product not found",
-      });
+      }, 404);
     }
 
     if (!checkout.status.find((s) => s.order_status === "success")) {
       return c.json({
         success: false,
         message: "you cant review until completed",
-      });
+      }, 400);
     }
 
     const existing = await prisma.reviews.findFirst({
@@ -260,7 +260,7 @@ export const createReview = async (c: Context) => {
       return c.json({
         success: false,
         message: "You cant review again",
-      });
+      }, 400);
     }
 
     await prisma.reviews.create({
@@ -309,7 +309,7 @@ export const deleteReview = async (c: Context) => {
       return c.json({
         success: false,
         message: "review not found",
-      });
+      }, 404);
     }
 
     await prisma.reviews.delete({

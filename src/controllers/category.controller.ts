@@ -5,6 +5,7 @@ import { CategoryRequest } from "../types/category";
 export const getAllCategory = async (c: Context) => {
   try {
     const categoryData = await prisma.categories.findMany({
+      where: { is_active: true },
       select: { category: true, product: { select: { id: true } } },
     });
 
@@ -40,7 +41,7 @@ export const getOneCategory = async (c: Context) => {
     const category = c.req.param("category");
 
     const categoryData = await prisma.categories.findUnique({
-      where: { category: String(category) },
+      where: { category: String(category), is_active: true },
       select: { category: true, product: true },
     });
 
@@ -84,7 +85,7 @@ export const createCategory = async (c: Context) => {
       return c.json({
         success: false,
         message: "Category has been registed",
-      });
+      }, 400);
     }
 
     await prisma.categories.create({
@@ -224,7 +225,7 @@ export const deleteCategory = async (c: Context) => {
         success: false,
         message:
           "There are still products in this category, please move the product to another category first.",
-      });
+      }, 400);
     }
 
     await prisma.categories.delete({

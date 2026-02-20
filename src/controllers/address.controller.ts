@@ -8,8 +8,8 @@ export const getAllAddress = async (c: Context) => {
     const userId = c.get("userId");
 
     const address = await prisma.address.findMany({
-      where: { user_id: userId },
-      omit: { user_id: true },
+      where: { user_id: userId, is_active: true },
+      omit: { user_id: true, is_active: true, deleted_at: true },
     });
 
     return c.json({
@@ -36,8 +36,8 @@ export const getOneAddress = async (c: Context) => {
     const addressId = c.req.param("id");
 
     const address = await prisma.address.findUnique({
-      where: { id: Number(addressId), user_id: userId },
-      omit: { user_id: true },
+      where: { id: Number(addressId), user_id: userId, is_active: true },
+      omit: { user_id: true, is_active: true, deleted_at: true },
     });
 
     if (!address) {
@@ -81,14 +81,17 @@ export const getDistance = async (c: Context) => {
     });
 
     if (!adminAddress) {
-      return c.json({
-        success: false,
-        message: "address admin not found",
-      });
+      return c.json(
+        {
+          success: false,
+          message: "address admin not found",
+        },
+        404,
+      );
     }
 
     const userAddress = await prisma.address.findUnique({
-      where: { user_id: userId, id: Number(addressId) },
+      where: { user_id: userId, id: Number(addressId), is_active: true },
       select: {
         latitude: true,
         longitude: true,
@@ -96,10 +99,13 @@ export const getDistance = async (c: Context) => {
     });
 
     if (!userAddress) {
-      return c.json({
-        success: false,
-        message: "address not found",
-      });
+      return c.json(
+        {
+          success: false,
+          message: "address not found",
+        },
+        404,
+      );
     }
 
     const res = await distanceLocation(
@@ -132,7 +138,6 @@ export const getDistance = async (c: Context) => {
   }
 };
 
-// FIXME: user only have 1 main address, check when update main_address to true
 export const createAddress = async (c: Context) => {
   try {
     const userId = c.get("userId");

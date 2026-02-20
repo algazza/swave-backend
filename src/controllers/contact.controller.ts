@@ -39,7 +39,7 @@ export const getOneContact = async (c: Context) => {
       return c.json({
         success: false,
         message: "Contact not found",
-      });
+      }, 404);
     }
 
     return c.json({
@@ -104,7 +104,7 @@ export const deleteContact = async (c: Context) => {
       return c.json({
         success: false,
         message: "Contact not found",
-      });
+      }, 404);
     }
 
     await prisma.contacts.delete({

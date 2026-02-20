@@ -168,7 +168,7 @@ export const getOneCheckoutAdmin = async (c: Context) => {
       return c.json({
         success: false,
         message: "Checkout not found",
-      });
+      }, 404);
     }
 
     return c.json({
@@ -259,7 +259,7 @@ export const getOneCheckoutUser = async (c: Context) => {
       return c.json({
         success: false,
         message: "Checkout not found",
-      });
+      }, 404);
     }
 
     const checkoutJson = {
@@ -318,7 +318,7 @@ export const createCheckout = async (c: Context) => {
       return c.json({
         success: false,
         message: "Address not found",
-      });
+      }, 404);
     }
 
     const adminAddress = await prisma.address.findFirst({
@@ -333,7 +333,7 @@ export const createCheckout = async (c: Context) => {
       return c.json({
         success: false,
         message: "address admin not found",
-      });
+      }, 404);
     }
 
     const res = await distanceLocation(
@@ -539,7 +539,7 @@ export const createStatusCheckout = async (c: Context) => {
       return c.json({
         success: false,
         message: "Checkout not found",
-      });
+      }, 404);
     }
 
     const { order_status, description } = c.get(

@@ -111,7 +111,7 @@ export const addCart = async (c: Context) => {
       return c.json({
         success: false,
         message: "Product not found",
-      });
+      }, 404);
     }
 
     const variant = await prisma.variants.findUnique({
@@ -123,14 +123,14 @@ export const addCart = async (c: Context) => {
       return c.json({
         success: false,
         message: "Variant not found",
-      });
+      }, 404);
     }
 
     if (variant.product_id !== product_id) {
       return c.json({
         success: false,
         message: "Variant does not belong to this product",
-      });
+      }, 404);
     }
 
     const existing = await prisma.carts.findFirst({
@@ -230,7 +230,7 @@ export const updateCart = async (c: Context) => {
       return c.json({
         success: false,
         message: "Cart not found",
-      });
+      }, 404);
     }
 
     const { quantity } = c.get("validatedBody") as UpdateCartRequest;
@@ -276,7 +276,7 @@ export const deleteCart = async (c: Context) => {
       return c.json({
         success: false,
         message: "Cart not found",
-      });
+      }, 404);
     }
 
     await prisma.carts.delete({
@@ -284,7 +284,7 @@ export const deleteCart = async (c: Context) => {
     });
 
     return c.json({
-      succes: true,
+      success: true,
       message: "Success delete cart",
     });
   } catch (err) {
