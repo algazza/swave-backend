@@ -9,10 +9,12 @@ export const getAllCheckout = async (c: Context) => {
   try {
     const checkout = await prisma.checkouts.findMany({
       select: {
+        created_at: true,
         order_id: true,
         user: {
           select: {
             name: true,
+            username: true,
           },
         },
         status: {
@@ -34,8 +36,10 @@ export const getAllCheckout = async (c: Context) => {
     });
 
     const checkoutJson = checkout.map((item) => ({
+      created_at: item.created_at,
       order_id: item.order_id,
       name: item.user.name,
+      username: item.user.username,
       status: item.status[0].order_status,
       delivery: item.delivery.delivery_type,
       amount: item.total_price,
@@ -150,30 +154,96 @@ export const getOneCheckoutAdmin = async (c: Context) => {
       include: {
         delivery: {
           include: {
-            address: true,
+            address: {
+              omit: {
+                id: true,
+                user_id: true,
+                latitude: true,
+                longitude: true,
+              },
+            },
+          },
+          omit: {
+            id: true,
+            address_id: true,
+          },
+        },
+        status: {
+          omit: {
+            id: true,
+            checkout_id: true,
+            payment_status: true,
           },
         },
         user: {
           select: {
-            username: true,
             name: true,
+            username: true,
           },
         },
-        status: true,
-        product_checkout: true,
+        product_checkout: {
+          select: {
+            quantity: true,
+            price: true,
+            product: {
+              select: {
+                id: true,
+                name: true,
+                product_images: {
+                  take: 1,
+                  select: { image_path: true },
+                },
+                category: {
+                  select: {
+                    category: true,
+                  },
+                },
+              },
+            },
+            variant: {
+              select: {
+                variant: true,
+                price: true,
+              },
+            },
+          },
+        },
+      },
+      omit: {
+        user_id: true,
+        snap_token: true,
+        id: true,
+        delevery_id: true,
       },
     });
 
     if (!checkout) {
-      return c.json({
-        success: false,
-        message: "Checkout not found",
-      }, 404);
+      return c.json(
+        {
+          success: false,
+          message: "Checkout not found",
+        },
+        404,
+      );
     }
+
+    const checkoutJson = {
+      ...checkout,
+      product_checkout: checkout.product_checkout.map((p) => ({
+        id: p.product.id,
+        category: p.product.category.category,
+        name: p.product.name,
+        image_path: p.product.product_images.map((img) => img.image_path)[0],
+        variant: p.variant.variant,
+        variant_price: p.variant.price,
+        quantity: p.quantity,
+        total_price: p.price,
+      })),
+    };
 
     return c.json({
       success: true,
-      data: checkout,
+      data: checkoutJson,
     });
   } catch (err) {
     return c.json(
@@ -256,10 +326,13 @@ export const getOneCheckoutUser = async (c: Context) => {
     });
 
     if (!checkout) {
-      return c.json({
-        success: false,
-        message: "Checkout not found",
-      }, 404);
+      return c.json(
+        {
+          success: false,
+          message: "Checkout not found",
+        },
+        404,
+      );
     }
 
     const checkoutJson = {
@@ -315,10 +388,13 @@ export const createCheckout = async (c: Context) => {
     });
 
     if (!address) {
-      return c.json({
-        success: false,
-        message: "Address not found",
-      }, 404);
+      return c.json(
+        {
+          success: false,
+          message: "Address not found",
+        },
+        404,
+      );
     }
 
     const adminAddress = await prisma.address.findFirst({
@@ -330,10 +406,13 @@ export const createCheckout = async (c: Context) => {
     });
 
     if (!adminAddress) {
-      return c.json({
-        success: false,
-        message: "address admin not found",
-      }, 404);
+      return c.json(
+        {
+          success: false,
+          message: "address admin not found",
+        },
+        404,
+      );
     }
 
     const res = await distanceLocation(
@@ -536,10 +615,13 @@ export const createStatusCheckout = async (c: Context) => {
     });
 
     if (!checkout) {
-      return c.json({
-        success: false,
-        message: "Checkout not found",
-      }, 404);
+      return c.json(
+        {
+          success: false,
+          message: "Checkout not found",
+        },
+        404,
+      );
     }
 
     const { order_status, description } = c.get(
@@ -590,7 +672,7 @@ export const createStatusCheckout = async (c: Context) => {
           },
         },
       });
-  
+
       if (order_status === "cancelled") {
         await Promise.all(
           checkout.product_checkout.map((p) =>
@@ -614,13 +696,13 @@ export const createStatusCheckout = async (c: Context) => {
             }),
           ),
         );
-  
+
         return c.json({
           success: true,
           message: "Success add cancel status",
         });
       }
-    })
+    });
 
     return c.json({
       success: true,
