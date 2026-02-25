@@ -5,6 +5,7 @@ import { UpdateUserRequest } from "../types/user";
 export const getAllUser = async (c: Context) => {
   try {
     const users = await prisma.users.findMany({
+      where: { role: "user", is_active: true },
       select: {
         name: true,
         username: true,
@@ -42,12 +43,6 @@ export const getOneUser = async (c: Context) => {
         name: true,
         username: true,
         phone: true,
-        address: {
-          omit: {
-            id: true,
-            user_id: true,
-          },
-        },
       },
     });
 
@@ -65,6 +60,113 @@ export const getOneUser = async (c: Context) => {
       {
         success: true,
         data: user,
+      },
+      200,
+    );
+  } catch (err) {
+    return c.json(
+      {
+        success: false,
+        message:
+          err instanceof Error
+            ? err.message
+            : String(err) || "Internal server error",
+      },
+      500,
+    );
+  }
+};
+
+export const getOneUserAdmin = async (c: Context) => {
+  try {
+    const username = c.req.param("username");
+    const user = await prisma.users.findUnique({
+      where: { username },
+      select: {
+        name: true,
+        username: true,
+        phone: true,
+        address: {
+          omit: {
+            id: true,
+            user_id: true,
+          },
+        },
+        checkout: {
+          select: {
+            id: true,
+            order_id: true,
+            created_at: true,
+            status: {
+              orderBy: {
+                created_at: "desc",
+              },
+              take: 1,
+              select: {
+                order_status: true,
+              },
+            },
+            product_checkout: {
+              select: {
+                quantity: true,
+                price: true,
+                product: {
+                  select: {
+                    id: true,
+                    name: true,
+                    product_images: {
+                      take: 1,
+                      select: { image_path: true },
+                    },
+                    category: {
+                      select: {
+                        category: true,
+                      },
+                    },
+                  },
+                },
+                variant: {
+                  select: {
+                    variant: true,
+                    price: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      return c.json(
+        {
+          success: false,
+          message: "User not found",
+        },
+        404,
+      );
+    }
+    const checkoutJson = user.checkout.map((item) => ({
+      id: item.id,
+      order_id: item.order_id,
+      created_at: item.created_at,
+      status: item.status[0].order_status,
+      products: item.product_checkout.map((p) => ({
+        id: p.product.id,
+        category: p.product.category.category,
+        name: p.product.name,
+        image_path: p.product.product_images.map((img) => img.image_path)[0],
+        variant: p.variant.variant,
+        variant_price: p.variant.price,
+        quantity: p.quantity,
+        total_price: p.price,
+      })),
+    }));
+    return c.json(
+      {
+        success: true,
+        data: { ...user, checkout: checkoutJson },
       },
       200,
     );
