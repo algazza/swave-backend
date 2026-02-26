@@ -8,6 +8,7 @@ import {
   categoryRoute,
   checkoutRoute,
   contactRoute,
+  dashboardRoute,
   midtransRoute,
   productRoute,
   reviewRoute,
@@ -39,6 +40,7 @@ app.route("/api/cart", cartRoute);
 app.route("/api/checkout", checkoutRoute);
 app.route("/api/account", reviewRoute);
 app.route("/api/contact", contactRoute);
+app.route("/api/dashboard", dashboardRoute);
 app.route("/api/midtrans/webhook", midtransRoute);
 
 export default {
