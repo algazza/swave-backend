@@ -90,11 +90,14 @@ export const getOneUserAdmin = async (c: Context) => {
           omit: {
             id: true,
             user_id: true,
+            latitude: true,
+            longitude: true,
+            is_active: true,
+            deleted_at: true,
           },
         },
         checkout: {
           select: {
-            id: true,
             order_id: true,
             created_at: true,
             status: {
@@ -148,7 +151,6 @@ export const getOneUserAdmin = async (c: Context) => {
       );
     }
     const checkoutJson = user.checkout.map((item) => ({
-      id: item.id,
       order_id: item.order_id,
       created_at: item.created_at,
       status: item.status[0].order_status,
