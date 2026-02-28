@@ -1,12 +1,34 @@
 import { Context } from "hono";
 import { mkdir } from "node:fs/promises";
 import { rm } from "node:fs/promises";
-import tinify from "tinify";
 import prisma from "../../prisma/client";
 import { AddProductRequest, UpdateProductRequest } from "../types/product";
 import { slugify, slugifyFilename } from "../utils";
+import sharp = require("sharp");
 
-tinify.key = process.env.TINIFY_API_KEY || "";
+const MAX_IMAGE_DIMENSION = 1920;
+
+const optimizeImage = async (buffer: Buffer) => {
+  const image = sharp(buffer).rotate().resize({
+    width: MAX_IMAGE_DIMENSION,
+    height: MAX_IMAGE_DIMENSION,
+    fit: "inside",
+    withoutEnlargement: true,
+  });
+
+  const metadata = await image.metadata();
+
+  switch (metadata.format) {
+    case "png":
+      return image.png({ compressionLevel: 9, quality: 80 }).toBuffer();
+    case "webp":
+      return image.webp({ quality: 80 }).toBuffer();
+    case "avif":
+      return image.avif({ quality: 50 }).toBuffer();
+    default:
+      return image.jpeg({ quality: 80, mozjpeg: true }).toBuffer();
+  }
+};
 
 export const getAllProduct = async (c: Context) => {
   try {
@@ -366,7 +388,7 @@ export const createProduct = async (c: Context) => {
     await Promise.all(
       fileList.map(async (file) => {
         const buffer = Buffer.from(await file.arrayBuffer());
-        const compressed = await tinify.fromBuffer(buffer).toBuffer();
+        const compressed = await optimizeImage(buffer);
         const fileName = slugifyFilename(file.name);
 
         await Bun.write(`./images/${folderName}/${fileName}`, compressed);
@@ -672,7 +694,7 @@ export const addProductImage = async (c: Context) => {
 
     for (const file of fileList) {
       const buffer = Buffer.from(await file.arrayBuffer());
-      const compressed = await tinify.fromBuffer(buffer).toBuffer();
+      const compressed = await optimizeImage(buffer);
       const fileName = slugifyFilename(file.name);
 
       await Bun.write(`./images/${folderName}/${fileName}`, compressed);
@@ -744,7 +766,7 @@ export const updateProductImage = async (c: Context) => {
     }
 
     const buffer = Buffer.from(await image.arrayBuffer());
-    const composed = await tinify.fromBuffer(buffer).toBuffer();
+    const composed = await optimizeImage(buffer);
     await Bun.write(`./${oldImage.image_path}`, composed);
 
     return c.json({
