@@ -1,10 +1,12 @@
 services:
   api:
     build: .
+    image: alghaza/swave-backend:latest
     ports:
       - "5500:5500"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     env_file:
       - .env
     command: >
@@ -12,13 +14,23 @@ services:
       bunx prisma migrate deploy &&
       bun run dev
       "
+
   db:
-    image: mysql:8.0
+    image: postgres:16-alpine
+    restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_DATABASE: db_swave
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: rendang
+      POSTGRES_DB: db_swave
+    ports:
+      - "5432:5432"
     volumes:
-      - mysql-data:/var/lib/mysql
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d db_swave"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
 
 volumes:
-  mysql-data:
+  postgres-data:
