@@ -1,4 +1,4 @@
-import { MiddlewareHandler } from "hono";
+import type { MiddlewareHandler } from "hono";
 import { verify } from "hono/jwt";
 
 export const verifyToken: MiddlewareHandler = async (c, next) => {
@@ -16,13 +16,29 @@ export const verifyToken: MiddlewareHandler = async (c, next) => {
     const secret = process.env.JWT_SECRET || "radiohead";
     const payload = await verify(token, secret);
 
-    const userId = (payload as any).id ?? (payload as any).sub;
-    const role = (payload as any).role ?? "user";
+    const claims = payload as { id?: unknown; sub?: unknown; role?: unknown };
+    const rawUserId = claims.id ?? claims.sub;
+    const userId =
+      typeof rawUserId === "number"
+        ? rawUserId
+        : typeof rawUserId === "string" && /^\\d+$/.test(rawUserId)
+          ? Number(rawUserId)
+          : null;
+    const role = claims.role;
+
+    if (
+      !Number.isSafeInteger(userId) ||
+      (role !== "user" && role !== "admin")
+    ) {
+      return c.json({ message: "Invalid token" }, 401);
+    }
+
     c.set("userId", userId);
     c.set("role", role);
 
     await next();
-  } catch {
+  } catch (error) {
+    console.error("JWT verification failed:", error);
     return c.json({ message: "Invalid token" }, 401);
   }
 };

@@ -1,5 +1,5 @@
 import type { Context } from "hono";
-import { LoginRequest, RegisterRequest } from "../types/auth";
+import type { LoginRequest, RegisterRequest } from "../types/auth";
 import { sign } from "hono/jwt";
 import prisma from "../../prisma/client";
 
